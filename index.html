@@ -8,6 +8,7 @@
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
   <style>
     :root { 
@@ -83,6 +84,23 @@
     .btn-gold { background: #f59e0b; color: white; } 
     .menu-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
     .menu-item { background: white; padding: 15px; border-radius: 12px; text-align: center; box-shadow: 0 2px 5px rgba(0,0,0,0.02); cursor: pointer; }
+    /* --- CSS USER LIST (TAMBAHAN BARU) --- */
+    .user-item { 
+        display: flex; 
+        justify-content: space-between; /* Kunci: Kiri & Kanan kepisah */
+        align-items: center; 
+        padding: 15px; 
+        border-bottom: 1px solid #f1f5f9; 
+        background: white;
+    }
+    .user-info { text-align: left; }
+    .user-info div { font-size: 0.95rem; font-weight: 600; color: #334155; }
+    .user-info small { color: #64748b; font-size: 0.8rem; display: block; }
+    
+    .user-actions { 
+        display: flex; gap: 8px; /* Jarak antar tombol */
+    }
+    /* -------------------------------------- */
 
     /* MODAL */
     .modal-full { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #f8fafc; z-index: 2000; display: flex; flex-direction: column; }
@@ -115,7 +133,7 @@
         <div class="mb-3 bg-white bg-opacity-20 p-3 rounded-circle">
             <i class="fas fa-fingerprint fa-4x text-white"></i>
         </div>
-        <h3 class="fw-bold m-0">BEDAH HANDPHONE</h3>
+        <h3 class="fw-bold m-0">E-Absensi</h3>
         <p class="opacity-75 small">Sistem Manajemen Kehadiran</p>
       </div>
       
@@ -138,9 +156,9 @@
       </div>
 
       <div class="login-footer">
-        <div>&copy; 2026 Selangkah Lebih Maju</div>
+        <div>&copy; 2026 PT. Maju Bersama</div>
         <div class="mt-2">
-            <a href="#" class="text-decoration-none text-muted me-2">Upgrade</a> &bull; 
+            <a href="#" class="text-decoration-none text-muted me-2">Bantuan</a> &bull; 
             <a href="#" class="text-decoration-none text-muted ms-2">Versi 3.0</a>
         </div>
       </div>
@@ -262,7 +280,7 @@
       { nama: "Cabang KM 12",   lat: 0.000000, lon: 0.000000 },
       { nama: "Cabang KM 13",   lat: 0.000000, lon: 0.000000 }
     ];
-    const MAX_JARAK_METER = 50; 
+    const MAX_JARAK_METER = 30; 
 
     var userGlobal = {}, lokasiGlobal = "", jarakGlobal = 9999, targetLat=0, targetLon=0, gpsId=null;
 
@@ -286,6 +304,7 @@
     }
 
     // LOGIN
+    // UPDATE LOGIN (Dengan SweetAlert)
     document.getElementById('formLogin').addEventListener('submit', async function(e){
       e.preventDefault();
       var res = await kirimKeServer({ action: 'login', username: document.getElementById('username').value, password: document.getElementById('password').value });
@@ -303,7 +322,13 @@
         document.getElementById('loginPage').classList.add('hidden');
         document.getElementById('dashboard').classList.remove('hidden');
         startGPS();
-      } else { alert("Login Gagal"); }
+        
+        // Alert Selamat Datang
+        Swal.fire({ icon: 'success', title: 'Berhasil Masuk', text: 'Selamat Datang, ' + userGlobal.nama, timer: 1500, showConfirmButton: false });
+
+      } else { 
+        Swal.fire({ icon: 'error', title: 'Login Gagal', text: 'Username atau Password salah!' });
+      }
     });
 
     function setupTombol(info) {
@@ -335,13 +360,22 @@
 
     // ABSENSI
     function cekAksiAbsen(jenis) {
-        if (jarakGlobal > MAX_JARAK_METER) { alert("❌ Kejauhan ("+jarakGlobal+"m)!"); return; }
+        if (jarakGlobal > MAX_JARAK_METER) { 
+            Swal.fire({ icon: 'error', title: 'Terlalu Jauh', text: 'Anda ' + jarakGlobal + 'm dari kantor. Harap mendekat!' });
+            return; 
+        }
         if (jenis === 'Masuk') bukaKamera();
-        else if (jenis === 'Pulang') if(confirm("Absen Pulang?")) kirimAbsenPulang();
+        else if (jenis === 'Pulang') {
+            Swal.fire({
+                title: 'Absen Pulang?', text: "Pastikan pekerjaan Anda sudah selesai.", icon: 'warning',
+                showCancelButton: true, confirmButtonColor: '#d33', confirmButtonText: 'Ya, Pulang'
+            }).then((result) => { if (result.isConfirmed) kirimAbsenPulang(); });
+        }
     }
     async function kirimAbsenPulang() {
         var res = await kirimKeServer({ action: 'absen', nama: userGlobal.nama, jenisAbsen: 'Pulang', lokasi: lokasiGlobal, fotoBase64: "", keterangan: "-" });
-        alert(res.message); if(res.status == 'sukses') setupTombol(res.absenInfo);
+        Swal.fire({ icon: res.status=='sukses'?'success':'error', title: res.status=='sukses'?'Berhasil':'Gagal', text: res.message });
+        if(res.status == 'sukses') setupTombol(res.absenInfo);
     }
     function bukaKamera() {
       document.getElementById('modalKamera').classList.remove('hidden');
@@ -352,8 +386,14 @@
     async function jepretDanKirim() {
       var v=document.getElementById('video'); var c=document.getElementById('canvas'); c.width=v.videoWidth; c.height=v.videoHeight; c.getContext('2d').drawImage(v,0,0);
       var foto = c.toDataURL('image/png'); tutupKamera();
+      
+      // Loading Alert
+      Swal.fire({ title: 'Mengirim Data...', didOpen: () => { Swal.showLoading() } });
+
       var res = await kirimKeServer({ action: 'absen', nama: userGlobal.nama, jenisAbsen: 'Masuk', lokasi: lokasiGlobal, fotoBase64: foto, keterangan: "-" });
-      alert(res.message); if(res.status == 'sukses') setupTombol(res.absenInfo);
+      
+      Swal.fire({ icon: res.status=='sukses'?'success':'error', title: res.status=='sukses'?'Berhasil':'Gagal', text: res.message });
+      if(res.status == 'sukses') setupTombol(res.absenInfo);
     }
 
     // MANAJEMEN USER
@@ -363,11 +403,20 @@
         if(res.status == 'sukses') {
             var html = "";
             res.data.forEach(u => {
-                html += `<div class="user-item">
-                    <div class="user-info"><div>${u.nama}</div><small>${u.kantor} (${u.role})</small></div>
-                    <div>
-                        <button onclick="editUser('${u.username}','${u.password}','${u.nama}','${u.role}','${u.kantor}')" class="btn btn-sm btn-primary"><i class="fas fa-edit"></i></button>
-                        <button onclick="delUser('${u.username}')" class="btn btn-sm btn-outline-danger"><i class="fas fa-trash"></i></button>
+                // HTML BARU YANG RAPI
+                html += `
+                <div class="user-item">
+                    <div class="user-info">
+                        <div>${u.nama}</div>
+                        <small>${u.kantor} <span class="badge bg-light text-dark border ms-1">${u.role}</span></small>
+                    </div>
+                    <div class="user-actions">
+                        <button onclick="editUser('${u.username}','${u.password}','${u.nama}','${u.role}','${u.kantor}')" class="btn btn-sm btn-primary-soft shadow-sm" style="width:35px; height:35px; border-radius:8px; padding:0; display:flex; align-items:center; justify-content:center;">
+                            <i class="fas fa-pen" style="font-size:0.8rem"></i>
+                        </button>
+                        <button onclick="delUser('${u.username}')" class="btn btn-sm btn-outline-danger shadow-sm" style="width:35px; height:35px; border-radius:8px; padding:0; display:flex; align-items:center; justify-content:center;">
+                            <i class="fas fa-trash" style="font-size:0.8rem"></i>
+                        </button>
                     </div>
                 </div>`;
             });
@@ -386,9 +435,24 @@
     async function simpanUser() {
         var mode = document.getElementById('u_mode').value;
         var pl = { action: 'save_user', mode: mode, oldUsername: document.getElementById('u_old_user').value, username: document.getElementById('u_username').value, password: document.getElementById('u_password').value, nama: document.getElementById('u_nama').value, role: document.getElementById('u_role').value, kantor: document.getElementById('u_kantor').value };
-        var res = await kirimKeServer(pl); alert(res.message); if(res.status=='sukses') { closeFormUser(); loadUsers(); }
+        
+        Swal.fire({ title: 'Menyimpan...', didOpen: () => { Swal.showLoading() } });
+        var res = await kirimKeServer(pl); 
+        Swal.fire(res.status=='sukses'?'Berhasil':'Gagal', res.message, res.status=='sukses'?'success':'error');
+        if(res.status=='sukses') { closeFormUser(); loadUsers(); }
     }
-    async function delUser(u) { if(!confirm("Hapus user "+u+"?")) return; var res = await kirimKeServer({ action: 'del_user', username: u }); alert(res.message); if(res.status=='sukses') loadUsers(); }
+    async function delUser(u) { 
+        Swal.fire({
+            title: 'Hapus User?', text: "User " + u + " akan dihapus permanen.", icon: 'warning',
+            showCancelButton: true, confirmButtonColor: '#d33', confirmButtonText: 'Ya, Hapus'
+        }).then(async (result) => {
+            if (result.isConfirmed) {
+                var res = await kirimKeServer({ action: 'del_user', username: u }); 
+                Swal.fire('Terhapus!', res.message, 'success');
+                if(res.status=='sukses') loadUsers();
+            }
+        });
+    }
 
     // UTILS
     function bukaOwnerPanel() { document.getElementById('modalOwner').classList.remove('hidden'); loadApproval(); }
@@ -415,12 +479,19 @@
     function tampilFormIzin() { document.getElementById('modalIzin').classList.remove('hidden'); cekTipeIzin(); }
     function cekTipeIzin() { document.getElementById('boxBuktiSakit').classList.toggle('hidden', document.getElementById('tipeIzin').value !== 'Sakit'); }
     async function kirimIzin() {
-        var ket = document.getElementById('ketIzin').value; var tipe = document.getElementById('tipeIzin').value; if(!ket) { alert("Isi alasan!"); return; }
+        var ket = document.getElementById('ketIzin').value; var tipe = document.getElementById('tipeIzin').value;
+        if(!ket) { Swal.fire('Peringatan', 'Mohon isi alasan izin/sakit', 'warning'); return; }
+        
         var fileSakitBase64 = "";
         if(tipe === 'Sakit') { var fileInput = document.getElementById('fileSakit'); if(fileInput.files.length > 0) { const toBase64 = f => new Promise((r, j) => { const rd = new FileReader(); rd.readAsDataURL(f); rd.onload=()=>r(rd.result); rd.onerror=e=>j(e); }); fileSakitBase64 = await toBase64(fileInput.files[0]); } }
+        
         document.getElementById('modalIzin').classList.add('hidden');
+        Swal.fire({ title: 'Mengirim Pengajuan...', didOpen: () => { Swal.showLoading() } });
+
         var res = await kirimKeServer({ action: 'absen', nama: userGlobal.nama, jenisAbsen: tipe, lokasi: lokasiGlobal, fotoBase64: "", keterangan: ket, buktiSakitBase64: fileSakitBase64 });
-        alert(res.message); if(res.status == 'sukses') setupTombol(res.absenInfo);
+        
+        Swal.fire({ icon: res.status=='sukses'?'success':'error', title: res.message });
+        if(res.status == 'sukses') setupTombol(res.absenInfo);
     }
     function startGPS() { if(navigator.geolocation) gpsId = navigator.geolocation.watchPosition(p=>{ var d=Math.round(hitungJarak(targetLat,targetLon,p.coords.latitude,p.coords.longitude)); document.getElementById('statusJarak').innerHTML = d<=MAX_JARAK_METER ? `<span class="text-success">${d}m OK</span>` : `<span class="text-danger">${d}m Jauh</span>`; jarakGlobal=d; lokasiGlobal=p.coords.latitude+","+p.coords.longitude; }, e=>{}); }
     function hitungJarak(lat1,lon1,lat2,lon2){ if(lat1==0)return 0; var R=6371e3, p=Math.PI/180; var a=0.5-Math.cos((lat2-lat1)*p)/2+Math.cos(lat1*p)*Math.cos(lat2*p)*(1-Math.cos((lon2-lon1)*p))/2; return R*2*Math.asin(Math.sqrt(a)); }
