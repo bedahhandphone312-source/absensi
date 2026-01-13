@@ -3,488 +3,429 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
-  <title>Absensi Pro Modern</title>
+  <title>Absensi Pro</title>
   
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
   <style>
-    :root {
-      --primary-gradient: linear-gradient(135deg, #4f46e5, #06b6d4); /* Warna Biru Ungu Modern */
-      --bg-color: #f3f4f6;
-      --card-bg: #ffffff;
-      --text-main: #1f2937;
+    :root { 
+      --primary: #4361ee; 
+      --primary-dark: #3a0ca3;
+      --accent: #4cc9f0;
+      --bg-app: #f8fafc; 
+      --surface: #ffffff; 
+      --text-dark: #0f172a; 
     }
-
-    body {
-      background-color: var(--bg-color);
-      font-family: 'Poppins', sans-serif; /* Font Modern */
-      color: var(--text-main);
-      -webkit-font-smoothing: antialiased;
+    
+    body { background-color: #cbd5e1; font-family: 'Poppins', sans-serif; display: flex; justify-content: center; min-height: 100vh; margin: 0; color: var(--text-dark); }
+    
+    /* CONTAINER UTAMA */
+    .app-container { 
+      width: 100%; max-width: 400px; background: var(--bg-app); min-height: 100vh; position: relative; overflow-x: hidden; box-shadow: 0 0 30px rgba(0,0,0,0.15); 
     }
-
-    /* CONTAINER HP */
-    .app-container {
-      max-width: 480px;
-      margin: 0 auto;
-      background: var(--bg-color);
-      min-height: 100vh;
-      position: relative;
-      box-shadow: 0 0 50px rgba(0,0,0,0.1);
-    }
-
-    /* HEADER GRADASI */
-    .header {
-      background: var(--primary-gradient);
-      color: white;
-      padding: 50px 30px 60px 30px;
+    
+    /* --- STYLE KHUSUS LOGIN --- */
+    .login-header {
+      background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+      height: 320px;
       border-bottom-left-radius: 40px;
       border-bottom-right-radius: 40px;
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      color: white;
       text-align: center;
+      padding-bottom: 50px;
+    }
+    
+    /* Hiasan Bulat (Blob) */
+    .blob { position: absolute; border-radius: 50%; filter: blur(40px); opacity: 0.4; }
+    .blob-1 { width: 150px; height: 150px; background: var(--accent); top: -20px; left: -20px; }
+    .blob-2 { width: 100px; height: 100px; background: #fff; bottom: 20px; right: -20px; opacity: 0.2; }
+
+    .login-card {
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(10px);
+      margin: -60px 25px 0 25px;
+      padding: 30px 25px;
+      border-radius: 20px;
+      box-shadow: 0 15px 35px rgba(0,0,0,0.1);
       position: relative;
-      box-shadow: 0 15px 30px rgba(79, 70, 229, 0.3);
+      z-index: 10;
     }
+
+    .input-group-text { background: transparent; border-right: none; border-radius: 12px 0 0 12px; color: var(--primary); }
+    .form-control-login { border-left: none; border-radius: 0 12px 12px 0; padding: 12px; font-size: 0.95rem; }
+    .form-control-login:focus { box-shadow: none; border-color: #dee2e6; }
+    .input-group:focus-within { box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.15); border-radius: 12px; }
+
+    .login-footer {
+      text-align: center;
+      margin-top: 40px;
+      color: #94a3b8;
+      font-size: 0.8rem;
+      padding-bottom: 20px;
+    }
+    .login-footer img { height: 20px; opacity: 0.5; margin-bottom: 5px; }
+
+    /* --- STYLE DASHBOARD & LAINNYA --- */
+    .header-compact { background: linear-gradient(135deg, var(--primary), var(--primary-dark)); padding: 30px 20px 40px 20px; border-bottom-left-radius: 25px; border-bottom-right-radius: 25px; color: white; text-align: center; margin-bottom: 20px; }
+    .card-glass { background: white; border-radius: 16px; padding: 20px; box-shadow: 0 2px 10px rgba(0,0,0,0.03); margin-bottom: 15px; border: 1px solid #e2e8f0; }
     
-    /* CARD STYLE (KARTU MELAYANG) */
-    .card-custom {
-      background: var(--card-bg);
-      border-radius: 25px;
-      border: none;
-      box-shadow: 0 10px 40px rgba(0,0,0,0.08); /* Shadow halus */
-      padding: 30px;
-      margin-bottom: 25px;
-      position: relative;
-    }
+    .btn-main { width: 100%; padding: 14px; border-radius: 12px; font-weight: 600; border: none; transition: 0.2s; cursor: pointer; letter-spacing: 0.5px; }
+    .btn-primary { background: linear-gradient(to right, var(--primary), #3f37c9); color: white; box-shadow: 0 5px 15px rgba(67, 97, 238, 0.3); }
+    .btn-primary:active { transform: scale(0.98); }
+    .btn-gold { background: #f59e0b; color: white; } 
+    .menu-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+    .menu-item { background: white; padding: 15px; border-radius: 12px; text-align: center; box-shadow: 0 2px 5px rgba(0,0,0,0.02); cursor: pointer; }
 
-    /* INPUT FORM BULAT */
-    .form-control {
-      background: #f9fafb;
-      border: 1px solid #e5e7eb;
-      border-radius: 15px;
-      padding: 18px;
-      font-size: 1rem;
-      transition: all 0.3s;
-    }
-    .form-control:focus {
-      background: #fff; border-color: #4f46e5; box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.1);
-    }
+    /* MODAL */
+    .modal-full { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #f8fafc; z-index: 2000; display: flex; flex-direction: column; }
+    .modal-header { padding: 15px 20px; background: white; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #e2e8f0; }
+    .modal-content-scroll { flex: 1; overflow-y: auto; padding: 20px; }
 
-    /* TOMBOL GRADASI KEREN */
-    .btn-grad {
-      background: var(--primary-gradient);
-      border: none; color: white; border-radius: 18px;
-      padding: 18px; font-weight: 600; letter-spacing: 0.5px;
-      box-shadow: 0 10px 25px rgba(79, 70, 229, 0.4);
-      transition: transform 0.2s;
-    }
-    .btn-grad:active { transform: scale(0.98); }
-    
-    .btn-masuk { background: linear-gradient(135deg, #10b981, #059669); box-shadow: 0 10px 25px rgba(16, 185, 129, 0.4); }
-    .btn-pulang { background: linear-gradient(135deg, #ef4444, #b91c1c); box-shadow: 0 10px 25px rgba(239, 68, 68, 0.4); }
+    /* TAB OWNER */
+    .nav-tabs .nav-link { color: #64748b; font-size: 0.9rem; border:none; }
+    .nav-tabs .nav-link.active { color: var(--primary); font-weight: 600; border-bottom: 3px solid var(--primary); background: transparent; }
 
-    /* STATUS BOX */
-    .status-box {
-      border-radius: 20px; padding: 20px; text-align: center; margin-bottom: 20px;
-    }
-
-    /* KAMERA FULLSCREEN */
-    #modalKamera { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #000; z-index: 9999; display: flex; flex-direction: column; align-items: center; justify-content: center; }
-    #video { width: 100%; height: 100%; object-fit: cover; position: absolute; transform: scaleX(-1); }
-    .scan-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: radial-gradient(circle, transparent 30%, rgba(0,0,0,0.85) 80%); pointer-events: none; }
-    .face-frame { 
-      position: absolute; top: 45%; left: 50%; transform: translate(-50%, -50%);
-      width: 280px; height: 380px; border: 3px solid rgba(255, 255, 255, 0.4); border-radius: 50%;
-      box-shadow: 0 0 60px rgba(6, 182, 212, 0.4);
-    }
-    .scan-line {
-      width: 100%; height: 4px; background: #06b6d4; position: absolute; top: 0;
-      animation: scanning 2s ease-in-out infinite; box-shadow: 0 0 20px #06b6d4;
-    }
-    @keyframes scanning { 0%, 100% {top: 0; opacity: 0;} 50% {top: 100%; opacity: 1;} }
-    .camera-controls { position: absolute; bottom: 50px; width: 100%; text-align: center; z-index: 20; }
-    
-    /* UTILITIES */
     .hidden { display: none !important; }
-    .fade-in { animation: fadeIn 0.6s cubic-bezier(0.22, 1, 0.36, 1); }
-    @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+    .fade-in { animation: fadeIn 0.5s ease-out; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
+    #loadingOverlay { position: fixed; top:0; left:0; width:100%; height:100%; background: rgba(255,255,255,0.9); z-index: 3000; display: flex; justify-content: center; align-items: center; flex-direction: column; }
     
-    #loadingOverlay {
-      position: fixed; top:0; left:0; width:100%; height:100%; 
-      background: rgba(255,255,255,0.9); z-index: 10000; 
-      display:flex; justify-content:center; align-items:center; flex-direction:column;
-    }
-    .spinner-custom { width: 60px; height: 60px; border: 5px solid #f3f3f3; border-top: 5px solid #4f46e5; border-radius: 50%; animation: spin 1s linear infinite; }
-    @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+    .form-control, .form-select { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 10px; padding: 12px; font-size: 0.9rem; margin-bottom: 15px; }
   </style>
 </head>
 <body>
 
-  <div id="loadingOverlay" class="hidden">
-    <div class="spinner-custom"></div>
-    <div class="mt-4 fw-bold text-dark" style="letter-spacing: 2px;">MEMPROSES...</div>
-  </div>
+  <div id="loadingOverlay" class="hidden"><div class="spinner-border text-primary"></div><div class="mt-2 small fw-bold">Memproses...</div></div>
 
   <div class="app-container">
     
     <div id="loginPage" class="fade-in">
-      <div class="header">
-        <div class="mb-4"><i class="fas fa-fingerprint fa-4x text-white-50"></i></div>
-        <h2 class="fw-bold">Absensi Pro</h2>
-        <p class="opacity-75">Sistem Absensi Karyawan</p>
+      
+      <div class="login-header">
+        <div class="blob blob-1"></div>
+        <div class="blob blob-2"></div>
+        <div class="mb-3 bg-white bg-opacity-20 p-3 rounded-circle">
+            <i class="fas fa-fingerprint fa-4x text-white"></i>
+        </div>
+        <h3 class="fw-bold m-0">E-Absensi</h3>
+        <p class="opacity-75 small">Sistem Manajemen Kehadiran</p>
       </div>
       
-      <div class="content" style="margin-top: -50px;">
-        <div class="card-custom">
-          <form id="formLogin">
-            <div class="mb-3">
-              <label class="text-muted small ms-2 mb-1">Username</label>
-              <input type="text" id="username" class="form-control" placeholder="Isi username..." required>
-            </div>
-            <div class="mb-4">
-              <label class="text-muted small ms-2 mb-1">Password</label>
-              <input type="password" id="password" class="form-control" placeholder="Isi password..." required>
-            </div>
-            <button type="submit" class="btn btn-grad w-100 fs-5">MASUK SISTEM</button>
-          </form>
-        </div>
-        <div class="text-center text-muted small mt-3">Ver 2.5 Modern UI</div>
+      <div class="login-card">
+        <h5 class="fw-bold text-center mb-4" style="color:var(--primary-dark)">Login Akun</h5>
+        <form id="formLogin">
+          
+          <div class="input-group mb-3">
+            <span class="input-group-text"><i class="fas fa-user"></i></span>
+            <input type="text" id="username" class="form-control form-control-login" placeholder="Username" required>
+          </div>
+
+          <div class="input-group mb-4">
+            <span class="input-group-text"><i class="fas fa-lock"></i></span>
+            <input type="password" id="password" class="form-control form-control-login" placeholder="Password" required>
+          </div>
+
+          <button type="submit" class="btn-main btn-primary shadow">MASUK SEKARANG <i class="fas fa-arrow-right ms-2"></i></button>
+        </form>
       </div>
+
+      <div class="login-footer">
+        <div>&copy; 2026 PT. Maju Bersama</div>
+        <div class="mt-2">
+            <a href="#" class="text-decoration-none text-muted me-2">Bantuan</a> &bull; 
+            <a href="#" class="text-decoration-none text-muted ms-2">Versi 3.0</a>
+        </div>
+      </div>
+
     </div>
 
     <div id="dashboard" class="hidden fade-in">
-      <div class="header pb-5">
-        <div class="d-flex justify-content-between align-items-center mb-3">
-           <small class="opacity-75 bg-white bg-opacity-25 px-3 py-1 rounded-pill">Halo, Selamat Datang</small>
-           <div onclick="logout()" style="cursor:pointer;" class="text-white"><i class="fas fa-sign-out-alt"></i></div>
-        </div>
-        <h2 id="userNama" class="fw-bold mb-1">Nama User</h2>
-        <div class="d-inline-block bg-white bg-opacity-20 px-3 py-1 rounded-pill mt-2">
-            <i class="fas fa-map-marker-alt me-1"></i> <span id="userKantor">-</span>
+      <div class="header-compact" style="text-align: left; padding-bottom: 50px;">
+        <div class="d-flex justify-content-between align-items-center">
+           <div><h5 id="userNama" class="fw-bold m-0 text-white">User</h5><small id="userKantor" class="badge bg-white text-primary mt-1 border-0">-</small></div>
+           <button onclick="logout()" class="btn btn-sm btn-outline-light border-0"><i class="fas fa-sign-out-alt fa-lg"></i></button>
         </div>
       </div>
 
-      <div class="content" style="margin-top: -60px;">
-        
-        <div class="card-custom text-center py-3 px-3 mb-3">
-           <div id="statusJarak" class="fw-bold text-muted small">
-             <i class="fas fa-satellite-dish fa-spin me-2"></i>Mencari Lokasi...
-           </div>
+      <div style="padding: 0 20px; margin-top: -40px;">
+        <div class="card-glass py-2 px-3 mb-3 d-flex align-items-center justify-content-between">
+           <small class="text-muted fw-bold"><i class="fas fa-satellite-dish me-2"></i>GPS Status</small><small id="statusJarak" class="text-secondary" style="font-size: 0.75rem;">Mencari...</small>
+        </div>
+        <div id="infoStatus" class="card-glass text-center"><div class="spinner-border spinner-border-sm text-secondary"></div></div>
+
+        <div id="areaOwner" class="hidden mb-3">
+            <button onclick="bukaOwnerPanel()" class="btn-main btn-gold shadow-sm"><i class="fas fa-user-shield me-2"></i> PANEL OWNER & USER</button>
         </div>
 
-        <div id="infoStatus" class="status-box shadow-sm">
-          Memuat data...
-        </div>
-        
         <div id="actionButtons">
-          <button id="btnMasuk" onclick="cekAksiAbsen('Masuk')" class="btn btn-grad btn-masuk w-100 mb-3 hidden">
-            <div class="d-flex align-items-center justify-content-center py-1">
-              <i class="fas fa-camera fa-2x me-3"></i> 
-              <div class="text-start">
-                  <div style="font-size: 0.8rem; opacity: 0.9;">Klik Untuk</div>
-                  <div class="fs-5">ABSEN MASUK</div>
-              </div>
-            </div>
-          </button>
-          
-          <button id="btnPulang" onclick="cekAksiAbsen('Pulang')" class="btn btn-grad btn-pulang w-100 mb-3 hidden">
-            <div class="d-flex align-items-center justify-content-center py-1">
-               <i class="fas fa-home fa-2x me-3"></i>
-               <div class="text-start">
-                  <div style="font-size: 0.8rem; opacity: 0.9;">Klik Untuk</div>
-                  <div class="fs-5">ABSEN PULANG</div>
-              </div>
-            </div>
-          </button>
-          
-          <div id="msgSelesai" class="alert alert-success text-center hidden p-4" style="border-radius: 20px;">
-            <i class="fas fa-check-circle fa-4x mb-3 text-success"></i><br>
-            <span class="fw-bold fs-5">Absensi Selesai!</span><br>
-            <small>Terima kasih sudah bekerja hari ini.</small>
-          </div>
-        </div>
-        
-        <div class="row g-3 mt-1">
-          <div class="col-6">
-            <div class="card-custom p-3 text-center h-100" onclick="bukaRiwayat()" style="cursor:pointer; margin-bottom:0; display:flex; flex-direction:column; align-items:center; justify-content:center;">
-              <div class="bg-primary bg-opacity-10 p-3 rounded-circle mb-2 text-primary">
-                  <i class="fas fa-history fa-lg"></i>
-              </div>
-              <div class="fw-bold small">Riwayat</div>
-            </div>
-          </div>
-          <div class="col-6">
-             <div class="card-custom p-3 text-center h-100" onclick="tampilFormIzin()" style="cursor:pointer; margin-bottom:0; display:flex; flex-direction:column; align-items:center; justify-content:center;">
-              <div class="bg-warning bg-opacity-10 p-3 rounded-circle mb-2 text-warning">
-                  <i class="fas fa-file-medical fa-lg"></i>
-              </div>
-              <div class="fw-bold small">Izin / Sakit</div>
-            </div>
-          </div>
+          <button id="btnMasuk" onclick="cekAksiAbsen('Masuk')" class="btn-main btn-primary mb-3 hidden shadow-sm"><i class="fas fa-camera me-2"></i> ABSEN MASUK</button>
+          <button id="btnPulang" onclick="cekAksiAbsen('Pulang')" class="btn-main mb-3 hidden shadow-sm" style="background:#ef4444; color:white;"><i class="fas fa-home me-2"></i> ABSEN PULANG</button>
+          <div id="msgSelesai" class="alert alert-success text-center hidden small border-0 bg-success bg-opacity-10 text-success fw-bold">Absensi Selesai</div>
         </div>
 
+        <div class="menu-grid">
+          <div class="menu-item" onclick="bukaRiwayat()"><i class="fas fa-history fa-lg text-primary mb-2"></i><div class="small">Riwayat</div></div>
+          <div class="menu-item" onclick="tampilFormIzin()"><i class="fas fa-file-medical fa-lg text-warning mb-2"></i><div class="small">Izin / Sakit</div></div>
+        </div>
       </div>
     </div>
 
-    <div id="modalKamera" class="hidden fade-in">
-      <video id="video" autoplay playsinline></video>
+    <div id="modalOwner" class="modal-full hidden fade-in">
+        <div class="modal-header"><h5 class="fw-bold m-0">Panel Owner</h5><button onclick="document.getElementById('modalOwner').classList.add('hidden')" class="btn-close"></button></div>
+        <ul class="nav nav-tabs justify-content-center bg-white" role="tablist">
+          <li class="nav-item"><button class="nav-link active" data-bs-toggle="tab" data-bs-target="#tab-approval">Approval</button></li>
+          <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-rekap">Laporan</button></li>
+          <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-users" onclick="loadUsers()">Kelola User</button></li>
+        </ul>
+        <div class="modal-content-scroll">
+            <div class="tab-content">
+                <div class="tab-pane fade show active" id="tab-approval"><div id="listApproval">Loading...</div></div>
+                <div class="tab-pane fade" id="tab-rekap">
+                    <div class="card-glass p-3 mb-3">
+                        <select id="filterCabang" class="form-select mb-2"><option value="All">Semua Cabang</option></select>
+                        <div class="row g-2">
+                            <div class="col-6"><select id="filterBulan" class="form-select"><option value="1">Januari</option><option value="2">Februari</option><option value="3">Maret</option><option value="4">April</option><option value="5">Mei</option><option value="6">Juni</option><option value="7">Juli</option><option value="8">Agustus</option><option value="9">September</option><option value="10">Oktober</option><option value="11">November</option><option value="12">Desember</option></select></div>
+                            <div class="col-6"><select id="filterTahun" class="form-select"><option value="2025">2025</option><option value="2026">2026</option></select></div>
+                        </div>
+                        <button onclick="loadRekap()" class="btn-main btn-primary mt-2">Tampilkan</button>
+                    </div>
+                    <div id="hasilRekap"></div>
+                </div>
+                <div class="tab-pane fade" id="tab-users">
+                    <button onclick="formUser('add')" class="btn-main btn-primary mb-3"><i class="fas fa-plus me-2"></i> Tambah User Baru</button>
+                    <div id="listUsers" class="card-glass p-0"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="modalFormUser" class="modal-full hidden bg-white">
+        <div class="modal-header"><h5 class="fw-bold m-0" id="titleFormUser">User</h5><button onclick="closeFormUser()" class="btn-close"></button></div>
+        <div class="p-4">
+            <input type="hidden" id="u_mode"><input type="hidden" id="u_old_user">
+            <label class="small fw-bold">Username</label><input type="text" id="u_username" class="form-control">
+            <label class="small fw-bold">Password</label><input type="text" id="u_password" class="form-control">
+            <label class="small fw-bold">Nama Lengkap</label><input type="text" id="u_nama" class="form-control">
+            <label class="small fw-bold">Role</label><select id="u_role" class="form-select"><option value="Staff">Staff</option><option value="Pimpinan">Pimpinan</option></select>
+            <label class="small fw-bold">Kantor Tugas</label><select id="u_kantor" class="form-select"></select>
+            <button onclick="simpanUser()" class="btn-main btn-primary mt-3">Simpan Data</button>
+        </div>
+    </div>
+
+    <div id="modalKamera" class="modal-full hidden" style="background:black; justify-content:center;">
+      <video id="video" autoplay playsinline style="width:100%; height:100%; object-fit:cover; position:absolute; transform:scaleX(-1);"></video>
       <canvas id="canvas" class="hidden"></canvas>
-      
-      <div class="scan-overlay"></div>
-      <div class="face-frame">
-        <div class="scan-line" id="scanLine"></div>
-      </div>
-
-      <div class="camera-controls">
-        <div id="textSensor" class="text-white bg-dark bg-opacity-50 px-4 py-2 rounded-pill mb-4 small" style="letter-spacing: 2px;">MENGHUBUNGKAN...</div>
-        
-        <button id="btnJepret" onclick="jepretDanKirim()" class="btn btn-light btn-lg w-100 fw-bold shadow-lg rounded-pill py-3 text-primary" disabled>
-          <i class="fas fa-camera me-2"></i> AMBIL FOTO
-        </button>
-        
-        <button onclick="tutupKamera()" class="btn btn-outline-light btn-sm mt-4 px-5 rounded-pill">Batal</button>
-      </div>
-    </div>
-    
-    <div id="modalIzin" class="hidden fade-in" style="position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.6);z-index:100;display:flex;align-items:center;justify-content:center;padding:20px;">
-      <div class="card-custom w-100" style="max-width:400px; position:relative;">
-        <button onclick="document.getElementById('modalIzin').classList.add('hidden')" class="btn-close position-absolute top-0 end-0 m-4"></button>
-        <h4 class="fw-bold mb-4 text-center">Form Pengajuan</h4>
-        <select id="tipeIzin" class="form-select mb-3"><option value="Sakit">Sakit</option><option value="Izin">Izin</option><option value="Cuti">Cuti</option></select>
-        <textarea id="ketIzin" class="form-control mb-4" rows="3" placeholder="Tulis alasan..."></textarea>
-        <button onclick="kirimIzin()" class="btn btn-warning w-100 fw-bold py-3 text-white rounded-4">KIRIM PENGAJUAN</button>
+      <div style="width:260px; height:350px; border:2px solid white; border-radius:130px; position:absolute; z-index:10; box-shadow:0 0 0 999px rgba(0,0,0,0.5);"></div>
+      <div style="position:absolute; bottom:40px; text-align:center; z-index:20; width:100%;">
+        <button id="btnJepret" onclick="jepretDanKirim()" class="btn btn-light rounded-circle p-3" disabled><i class="fas fa-camera fa-2x"></i></button>
+        <div class="mt-3"><button onclick="tutupKamera()" class="btn btn-sm text-white">Batal</button></div>
       </div>
     </div>
 
-    <div id="modalRiwayat" class="hidden fade-in" style="position:fixed;top:0;left:0;width:100%;height:100%;background:#f3f4f6;z-index:100;overflow-y:auto;">
-      <div class="header py-4 px-3 d-flex justify-content-between align-items-center mb-2" style="border-radius:0 0 30px 30px;">
-        <h4 class="mb-0">Riwayat Absensi</h4>
-        <button onclick="document.getElementById('modalRiwayat').classList.add('hidden')" class="btn btn-sm btn-light rounded-circle p-2"><i class="fas fa-times"></i></button>
+    <div id="modalIzin" class="modal-full hidden">
+      <div class="modal-header"><h5 class="fw-bold m-0">Form Izin</h5><button onclick="document.getElementById('modalIzin').classList.add('hidden')" class="btn-close"></button></div>
+      <div class="modal-content-scroll">
+          <label class="small fw-bold">Jenis</label>
+          <select id="tipeIzin" class="form-select" onchange="cekTipeIzin()"><option value="Sakit">Sakit</option><option value="Izin">Izin</option><option value="Cuti">Cuti</option></select>
+          <div id="boxBuktiSakit" class="card-glass p-3 mb-3 bg-warning bg-opacity-10 border-warning hidden">
+             <label class="small fw-bold"><i class="fas fa-paperclip"></i> Upload Surat Dokter</label>
+             <input type="file" id="fileSakit" class="form-control mt-2" accept="image/*">
+          </div>
+          <label class="small fw-bold">Alasan</label><textarea id="ketIzin" class="form-control" rows="3"></textarea>
+          <button onclick="kirimIzin()" class="btn-main btn-primary">Kirim</button>
       </div>
-      <div id="listRiwayat" class="content">Loading...</div>
     </div>
 
+    <div id="modalRiwayat" class="modal-full hidden">
+      <div class="modal-header"><h5 class="fw-bold m-0">Riwayat</h5><button onclick="document.getElementById('modalRiwayat').classList.add('hidden')" class="btn-close"></button></div>
+      <div id="listRiwayat" class="modal-content-scroll">Loading...</div>
+    </div>
   </div>
 
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
   <script>
     // ==========================================
-    // PASTE URL DEPLOYMENT GOOGLE SCRIPT DISINI
+    // PASTE URL DEPLOYMENT DISINI
+    const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbw-77D7BjT8VhJ0yWja5ijqNJPWiM0ETX6O92pDMw-mMgf1_Lz5DraIE4BtU8zZM-NS/exec"; 
     // ==========================================
-    const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzDn9JuLWlKotsGtmMIpLnzv0CU7Mzio6OvndHtLA-Ru9SxTYk3dRCV6zGFUJGMLVE/exec"; 
-    // ==========================================
-
     const DAFTAR_KANTOR = [
-      { nama: "Cabang Aimas 1", lat: -0.9428240, lon: 131.3272016 },
+      { nama: "Cabang Aimas 1", lat: -0.925586, lon: 131.229156 },
       { nama: "Cabang Aimas 2", lat: 0.000000, lon: 0.000000 },
       { nama: "Cabang KM 12",   lat: 0.000000, lon: 0.000000 },
       { nama: "Cabang KM 13",   lat: 0.000000, lon: 0.000000 }
     ];
     const MAX_JARAK_METER = 50; 
 
-    var userGlobal = {}, lokasiGlobal = "", jarakGlobal = 9999, targetLat=0, targetLon=0, tipeAbsenAktif = "";
+    var userGlobal = {}, lokasiGlobal = "", jarakGlobal = 9999, targetLat=0, targetLon=0, gpsId=null;
+
+    function initCombo() {
+       let sel = document.getElementById('filterCabang'); let sel2 = document.getElementById('u_kantor');
+       sel.innerHTML = '<option value="All">Semua Cabang</option>'; sel2.innerHTML = '';
+       DAFTAR_KANTOR.forEach(k => {
+          sel.innerHTML += `<option value="${k.nama}">${k.nama}</option>`;
+          sel2.innerHTML += `<option value="${k.nama}">${k.nama}</option>`; 
+       });
+       sel2.innerHTML += `<option value="Kantor Pusat">Kantor Pusat</option>`;
+    }
+    initCombo();
 
     async function kirimKeServer(payload) {
       document.getElementById('loadingOverlay').classList.remove('hidden');
       try {
-        const response = await fetch(GOOGLE_SCRIPT_URL, {
-          method: 'POST', body: JSON.stringify(payload)
-        });
-        const hasil = await response.json();
-        document.getElementById('loadingOverlay').classList.add('hidden');
-        return hasil;
-      } catch (error) {
-        document.getElementById('loadingOverlay').classList.add('hidden');
-        alert("Gagal koneksi: " + error); return null;
-      }
+        const response = await fetch(GOOGLE_SCRIPT_URL, { method: 'POST', body: JSON.stringify(payload) });
+        return await response.json();
+      } catch (error) { alert("Error: "+error); return null; } finally { document.getElementById('loadingOverlay').classList.add('hidden'); }
     }
 
-    // 1. LOGIN
+    // LOGIN
     document.getElementById('formLogin').addEventListener('submit', async function(e){
       e.preventDefault();
-      var u = document.getElementById('username').value;
-      var p = document.getElementById('password').value;
-      var res = await kirimKeServer({ action: 'login', username: u, password: p });
+      var res = await kirimKeServer({ action: 'login', username: document.getElementById('username').value, password: document.getElementById('password').value });
       if(res && res.status == 'sukses'){
         userGlobal = res.data;
         document.getElementById('userNama').innerText = userGlobal.nama;
-        document.getElementById('userKantor').innerText = userGlobal.kantorTugas;
+        document.getElementById('userKantor').innerHTML = userGlobal.kantorTugas;
         var kantor = DAFTAR_KANTOR.find(k => k.nama === userGlobal.kantorTugas);
-        if(kantor) { targetLat = kantor.lat; targetLon = kantor.lon; } 
-        else { targetLat = 0; targetLon = 0; }
+        if(kantor) { targetLat = kantor.lat; targetLon = kantor.lon; } else { targetLat=0; targetLon=0; }
+        
+        if(userGlobal.role === 'Pimpinan') document.getElementById('areaOwner').classList.remove('hidden');
+        else document.getElementById('areaOwner').classList.add('hidden');
 
         setupTombol(res.absenInfo);
         document.getElementById('loginPage').classList.add('hidden');
         document.getElementById('dashboard').classList.remove('hidden');
         startGPS();
-      } else { alert("Login Gagal: " + (res ? "Cek User/Pass" : "Server Error")); }
+      } else { alert("Login Gagal"); }
     });
 
-    // UPDATE UI (WARNA WARNI MODERN)
     function setupTombol(info) {
       document.getElementById('btnMasuk').classList.add('hidden');
       document.getElementById('btnPulang').classList.add('hidden');
       document.getElementById('msgSelesai').classList.add('hidden');
       var infoDiv = document.getElementById('infoStatus');
-      var tglHariIni = info.tanggal || "Hari Ini";
+      var tgl = info.tanggal || "Hari Ini";
 
-      if (!info.sudahMasuk) {
-        // BELUM ABSEN
-        infoDiv.innerHTML = `
-            <div class="fw-bold text-primary mb-2 fs-5">${tglHariIni}</div>
-            <div class="badge bg-primary bg-opacity-10 text-primary px-3 py-2 rounded-pill">Status: Belum Absen</div>
-        `;
-        infoDiv.style.background = "#eef2ff"; 
+      if (!info.adaData) {
+        infoDiv.innerHTML = `<div class="fw-bold text-primary">${tgl}</div><small>Belum Absen</small>`;
         document.getElementById('btnMasuk').classList.remove('hidden');
-
-      } else if (info.sudahMasuk && !info.sudahPulang) {
-        // SUDAH MASUK
-        infoDiv.innerHTML = `
-            <div class="fw-bold text-success mb-2 fs-5">${tglHariIni}</div>
-            <div class="d-flex justify-content-center gap-4">
-                <div class="text-center"><div class="small text-muted">MASUK</div><div class="fw-bold fs-5">${info.jamMasuk}</div></div>
-                <div class="text-center opacity-50"><div class="small text-muted">PULANG</div><div class="fw-bold fs-5">-</div></div>
-            </div>
-        `;
-        infoDiv.style.background = "#f0fdf4"; 
-        document.getElementById('btnPulang').classList.remove('hidden');
-
       } else {
-        // SELESAI
-        infoDiv.innerHTML = `
-            <div class="fw-bold text-secondary mb-2 fs-5">${tglHariIni}</div>
-            <div class="d-flex justify-content-center gap-4">
-                <div class="text-center"><div class="small text-muted">MASUK</div><div class="fw-bold fs-5">${info.jamMasuk}</div></div>
-                <div class="text-center"><div class="small text-muted">PULANG</div><div class="fw-bold fs-5">${info.jamPulang}</div></div>
-            </div>
-        `;
-        infoDiv.style.background = "#f9fafb";
-        document.getElementById('msgSelesai').classList.remove('hidden');
+          if (info.status === 'Hadir') {
+              if (!info.sudahPulang) {
+                  infoDiv.innerHTML = `<div class="fw-bold text-success">${tgl}</div><small>IN: <b>${info.jamMasuk}</b></small>`;
+                  document.getElementById('btnPulang').classList.remove('hidden');
+              } else {
+                  infoDiv.innerHTML = `<div class="fw-bold text-dark">${tgl}</div><small>IN: ${info.jamMasuk} | OUT: ${info.jamPulang}</small>`;
+                  document.getElementById('msgSelesai').classList.remove('hidden');
+              }
+          } else {
+              infoDiv.innerHTML = `<div class="fw-bold text-warning">${tgl}</div><small>Status: ${info.status} (${info.approval})</small>`;
+              document.getElementById('msgSelesai').innerHTML = "Pengajuan Terkirim";
+              document.getElementById('msgSelesai').classList.remove('hidden');
+          }
       }
     }
 
-    // 2. LOGIKA TOMBOL (PULANG = CONFIRM, MASUK = KAMERA)
+    // ABSENSI
     function cekAksiAbsen(jenis) {
-        if (jarakGlobal > MAX_JARAK_METER) { 
-            alert("❌ Posisi Anda terlalu jauh ("+jarakGlobal+"m) dari kantor!"); return; 
-        }
-        tipeAbsenAktif = jenis;
-        if (jenis === 'Masuk') {
-            bukaKamera(); 
-        } else if (jenis === 'Pulang') {
-            if(confirm("Apakah Anda yakin ingin Absen Pulang sekarang?")) { kirimAbsenPulang(); }
-        }
+        if (jarakGlobal > MAX_JARAK_METER) { alert("❌ Kejauhan ("+jarakGlobal+"m)!"); return; }
+        if (jenis === 'Masuk') bukaKamera();
+        else if (jenis === 'Pulang') if(confirm("Absen Pulang?")) kirimAbsenPulang();
     }
-
     async function kirimAbsenPulang() {
-        var res = await kirimKeServer({
-            action: 'absen', nama: userGlobal.nama, jenisAbsen: 'Pulang',
-            lokasi: lokasiGlobal + " (" + userGlobal.kantorTugas + ")", fotoBase64: "", keterangan: "-"
-        });
-        alert(res.message);
-        if(res.status == 'sukses') setupTombol(res.absenInfo);
+        var res = await kirimKeServer({ action: 'absen', nama: userGlobal.nama, jenisAbsen: 'Pulang', lokasi: lokasiGlobal, fotoBase64: "", keterangan: "-" });
+        alert(res.message); if(res.status == 'sukses') setupTombol(res.absenInfo);
     }
-
-    // 3. KAMERA
     function bukaKamera() {
       document.getElementById('modalKamera').classList.remove('hidden');
-      var video = document.getElementById('video');
-      navigator.mediaDevices.getUserMedia({ video: { facingMode: "user" } }).then(s => {
-        video.srcObject = s; simulasiSensor();
-      }).catch(e => { alert("Error Kamera: "+e); tutupKamera(); });
+      var v = document.getElementById('video');
+      navigator.mediaDevices.getUserMedia({ video: { facingMode: "user" } }).then(s => { v.srcObject = s; setTimeout(()=>{document.getElementById('btnJepret').disabled=false;},1500); }).catch(e => { alert(e); tutupKamera(); });
     }
-
-    function simulasiSensor() {
-      var txt = document.getElementById('textSensor');
-      var line = document.getElementById('scanLine');
-      var btn = document.getElementById('btnJepret');
-      btn.disabled = true; btn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i> SCANNING...';
-      txt.innerText = "MENCARI WAJAH..."; line.style.display = "block";
-      setTimeout(function(){
-        txt.innerText = "WAJAH TERDETEKSI"; txt.style.color="#4ade80"; line.style.display = "none"; 
-        btn.disabled = false; btn.innerHTML = '<i class="fas fa-camera me-2"></i> JEPRET';
-      }, 1500);
-    }
-
-    function tutupKamera() {
-      var v = document.getElementById('video'); if(v.srcObject) v.srcObject.getTracks().forEach(t=>t.stop());
-      document.getElementById('modalKamera').classList.add('hidden');
-    }
-
+    function tutupKamera() { var v=document.getElementById('video'); if(v.srcObject) v.srcObject.getTracks().forEach(t=>t.stop()); document.getElementById('modalKamera').classList.add('hidden'); }
     async function jepretDanKirim() {
-      var v = document.getElementById('video'); var c = document.getElementById('canvas');
-      c.width = v.videoWidth; c.height = v.videoHeight;
-      c.getContext('2d').drawImage(v, 0, 0);
-      var foto = c.toDataURL('image/png');
-      tutupKamera(); 
-      var res = await kirimKeServer({
-        action: 'absen', nama: userGlobal.nama, jenisAbsen: 'Masuk',
-        lokasi: lokasiGlobal + " (" + userGlobal.kantorTugas + ")", fotoBase64: foto, keterangan: "-"
-      });
-      alert(res.message); 
-      if(res.status == 'sukses') setupTombol(res.absenInfo);
-    }
-
-    // 4. GPS
-    function startGPS() {
-      if (navigator.geolocation) {
-        navigator.geolocation.watchPosition(p => {
-          var lat = p.coords.latitude, lon = p.coords.longitude;
-          lokasiGlobal = lat + "," + lon;
-          jarakGlobal = Math.round(hitungJarak(targetLat, targetLon, lat, lon));
-          var div = document.getElementById('statusJarak');
-          if(jarakGlobal <= MAX_JARAK_METER) {
-             div.innerHTML = `<span class="text-success"><i class="fas fa-check-circle me-1"></i> Lokasi Valid (${jarakGlobal}m)</span>`;
-          } else {
-             div.innerHTML = `<span class="text-danger"><i class="fas fa-exclamation-triangle me-1"></i> Kejauhan (${jarakGlobal}m)</span>`;
-          }
-        }, e => document.getElementById('statusJarak').innerText = "GPS Error", {enableHighAccuracy:true});
-      }
-    }
-    function hitungJarak(lat1, lon1, lat2, lon2) {
-      if(lat1 == 0) return 0;
-      var R = 6371e3, p = Math.PI/180;
-      var a = 0.5 - Math.cos((lat2-lat1)*p)/2 + Math.cos(lat1*p)*Math.cos(lat2*p) * (1-Math.cos((lon2-lon1)*p))/2;
-      return R * 2 * Math.asin(Math.sqrt(a));
-    }
-
-    function tampilFormIzin() { document.getElementById('modalIzin').classList.remove('hidden'); }
-    async function kirimIzin() {
-      var ket = document.getElementById('ketIzin').value;
-      if(!ket) { alert("Isi alasan!"); return; }
-      document.getElementById('modalIzin').classList.add('hidden');
-      var res = await kirimKeServer({
-        action: 'absen', nama: userGlobal.nama, jenisAbsen: document.getElementById('tipeIzin').value,
-        lokasi: lokasiGlobal, fotoBase64: "", keterangan: ket
-      });
+      var v=document.getElementById('video'); var c=document.getElementById('canvas'); c.width=v.videoWidth; c.height=v.videoHeight; c.getContext('2d').drawImage(v,0,0);
+      var foto = c.toDataURL('image/png'); tutupKamera();
+      var res = await kirimKeServer({ action: 'absen', nama: userGlobal.nama, jenisAbsen: 'Masuk', lokasi: lokasiGlobal, fotoBase64: foto, keterangan: "-" });
       alert(res.message); if(res.status == 'sukses') setupTombol(res.absenInfo);
     }
 
-    async function bukaRiwayat() {
-      document.getElementById('modalRiwayat').classList.remove('hidden');
-      var res = await kirimKeServer({ action: 'riwayat', nama: userGlobal.nama });
-      var div = document.getElementById('listRiwayat');
-      if(res.status == 'sukses' && res.data.length > 0) {
-        var html = "";
-        res.data.forEach(r => {
-           let warna = r.status == 'Hadir' ? 'border-success' : 'border-warning';
-           let icon = r.status == 'Hadir' ? '<i class="fas fa-check text-success"></i>' : '<i class="fas fa-clock text-warning"></i>';
-           html += `
-            <div class="card-custom p-3 mb-3 border-start border-4 ${warna} shadow-sm">
-              <div class="d-flex justify-content-between align-items-center mb-2">
-                <span class="fw-bold text-dark">${r.tanggal}</span>
-                <span class="badge bg-light text-dark border">${icon} ${r.status}</span>
-              </div>
-              <div class="small text-muted d-flex justify-content-between px-2">
-                 <span><i class="fas fa-sign-in-alt me-1"></i> ${r.masuk}</span>
-                 <span><i class="fas fa-sign-out-alt me-1"></i> ${r.pulang}</span>
-              </div>
-            </div>`;
-        });
-        div.innerHTML = html;
-      } else { div.innerHTML = "<div class='text-center mt-5 text-muted'>Belum ada riwayat.</div>"; }
+    // MANAJEMEN USER
+    async function loadUsers() {
+        document.getElementById('listUsers').innerHTML = "<div class='text-center p-3'>Loading...</div>";
+        var res = await kirimKeServer({ action: 'get_users' });
+        if(res.status == 'sukses') {
+            var html = "";
+            res.data.forEach(u => {
+                html += `<div class="user-item">
+                    <div class="user-info"><div>${u.nama}</div><small>${u.kantor} (${u.role})</small></div>
+                    <div>
+                        <button onclick="editUser('${u.username}','${u.password}','${u.nama}','${u.role}','${u.kantor}')" class="btn btn-sm btn-primary"><i class="fas fa-edit"></i></button>
+                        <button onclick="delUser('${u.username}')" class="btn btn-sm btn-outline-danger"><i class="fas fa-trash"></i></button>
+                    </div>
+                </div>`;
+            });
+            document.getElementById('listUsers').innerHTML = html;
+        }
     }
+    function formUser(mode) {
+        document.getElementById('modalFormUser').classList.remove('hidden'); document.getElementById('u_mode').value = mode;
+        if(mode == 'add') { document.getElementById('titleFormUser').innerText = "Tambah User"; document.getElementById('u_username').value = ""; document.getElementById('u_password').value = ""; document.getElementById('u_nama').value = ""; }
+    }
+    function editUser(u,p,n,r,k) {
+        formUser('edit'); document.getElementById('titleFormUser').innerText = "Edit User"; document.getElementById('u_old_user').value = u;
+        document.getElementById('u_username').value = u; document.getElementById('u_password').value = p; document.getElementById('u_nama').value = n; document.getElementById('u_role').value = r; document.getElementById('u_kantor').value = k;
+    }
+    function closeFormUser() { document.getElementById('modalFormUser').classList.add('hidden'); }
+    async function simpanUser() {
+        var mode = document.getElementById('u_mode').value;
+        var pl = { action: 'save_user', mode: mode, oldUsername: document.getElementById('u_old_user').value, username: document.getElementById('u_username').value, password: document.getElementById('u_password').value, nama: document.getElementById('u_nama').value, role: document.getElementById('u_role').value, kantor: document.getElementById('u_kantor').value };
+        var res = await kirimKeServer(pl); alert(res.message); if(res.status=='sukses') { closeFormUser(); loadUsers(); }
+    }
+    async function delUser(u) { if(!confirm("Hapus user "+u+"?")) return; var res = await kirimKeServer({ action: 'del_user', username: u }); alert(res.message); if(res.status=='sukses') loadUsers(); }
 
-    function logout() { location.reload(); }
+    // UTILS
+    function bukaOwnerPanel() { document.getElementById('modalOwner').classList.remove('hidden'); loadApproval(); }
+    async function loadApproval() {
+        var res = await kirimKeServer({ action: 'get_approval' }); var html = "";
+        if(res.status == 'sukses' && res.data.length > 0) {
+            res.data.forEach(r => {
+               var btnBukti = r.bukti ? `<a href="${r.bukti}" target="_blank" class="btn btn-sm btn-outline-primary w-100 mb-2">Lihat Bukti Sakit</a>` : "";
+               html += `<div class="card-glass p-3 mb-2 border-start border-4 border-warning"><div class="d-flex justify-content-between mb-1"><span class="fw-bold">${r.nama}</span><small>${r.tanggal}</small></div><div class="small mb-2 text-muted">${r.tipe}: "${r.ket}"</div>${btnBukti}<div class="d-flex gap-2"><button onclick="prosesApprove('${r.id}','Disetujui')" class="btn btn-sm btn-success w-100">Setujui</button><button onclick="prosesApprove('${r.id}','Ditolak')" class="btn btn-sm btn-outline-danger w-100">Tolak</button></div></div>`;
+            });
+            document.getElementById('listApproval').innerHTML = html;
+        } else { document.getElementById('listApproval').innerHTML = "<div class='text-center mt-5 text-muted'>Tidak ada data.</div>"; }
+    }
+    async function prosesApprove(id, sts) { if(confirm("Ubah status?")) { var res = await kirimKeServer({ action: 'set_approval', id: id, status: sts }); alert(res.message); loadApproval(); } }
+    async function loadRekap() {
+        var bln = document.getElementById('filterBulan').value; var thn = document.getElementById('filterTahun').value; var cab = document.getElementById('filterCabang').value;
+        document.getElementById('hasilRekap').innerHTML = "<div class='text-center'>Loading...</div>";
+        var res = await kirimKeServer({ action: 'get_rekap', bulan: bln, tahun: thn, cabang: cab }); var html = "";
+        if(res.status == 'sukses' && res.data.length > 0) {
+            res.data.forEach(r => { var warna = r.status == 'Hadir' ? 'text-success' : 'text-warning'; html += `<div class="card-glass p-2 mb-2 d-flex justify-content-between align-items-center"><div><div class="fw-bold small">${r.nama}</div><div class="text-muted" style="font-size:0.7rem">${r.tanggal}</div></div><div class="text-end"><div class="fw-bold small ${warna}">${r.status}</div><div style="font-size:0.7rem">In:${r.masuk} Out:${r.pulang}</div></div></div>`; });
+            document.getElementById('hasilRekap').innerHTML = html;
+        } else { document.getElementById('hasilRekap').innerHTML = "<div class='text-center mt-3 text-muted'>Data kosong.</div>"; }
+    }
+    function tampilFormIzin() { document.getElementById('modalIzin').classList.remove('hidden'); cekTipeIzin(); }
+    function cekTipeIzin() { document.getElementById('boxBuktiSakit').classList.toggle('hidden', document.getElementById('tipeIzin').value !== 'Sakit'); }
+    async function kirimIzin() {
+        var ket = document.getElementById('ketIzin').value; var tipe = document.getElementById('tipeIzin').value; if(!ket) { alert("Isi alasan!"); return; }
+        var fileSakitBase64 = "";
+        if(tipe === 'Sakit') { var fileInput = document.getElementById('fileSakit'); if(fileInput.files.length > 0) { const toBase64 = f => new Promise((r, j) => { const rd = new FileReader(); rd.readAsDataURL(f); rd.onload=()=>r(rd.result); rd.onerror=e=>j(e); }); fileSakitBase64 = await toBase64(fileInput.files[0]); } }
+        document.getElementById('modalIzin').classList.add('hidden');
+        var res = await kirimKeServer({ action: 'absen', nama: userGlobal.nama, jenisAbsen: tipe, lokasi: lokasiGlobal, fotoBase64: "", keterangan: ket, buktiSakitBase64: fileSakitBase64 });
+        alert(res.message); if(res.status == 'sukses') setupTombol(res.absenInfo);
+    }
+    function startGPS() { if(navigator.geolocation) gpsId = navigator.geolocation.watchPosition(p=>{ var d=Math.round(hitungJarak(targetLat,targetLon,p.coords.latitude,p.coords.longitude)); document.getElementById('statusJarak').innerHTML = d<=MAX_JARAK_METER ? `<span class="text-success">${d}m OK</span>` : `<span class="text-danger">${d}m Jauh</span>`; jarakGlobal=d; lokasiGlobal=p.coords.latitude+","+p.coords.longitude; }, e=>{}); }
+    function hitungJarak(lat1,lon1,lat2,lon2){ if(lat1==0)return 0; var R=6371e3, p=Math.PI/180; var a=0.5-Math.cos((lat2-lat1)*p)/2+Math.cos(lat1*p)*Math.cos(lat2*p)*(1-Math.cos((lon2-lon1)*p))/2; return R*2*Math.asin(Math.sqrt(a)); }
+    async function bukaRiwayat() { document.getElementById('modalRiwayat').classList.remove('hidden'); var res=await kirimKeServer({action:'riwayat',nama:userGlobal.nama}); var h=""; res.data.forEach(r=>{ h+=`<div class="card-glass p-2 mb-2"><div class="d-flex justify-content-between"><span class="fw-bold small">${r.tanggal}</span><span class="badge bg-light text-dark border">${r.status}</span></div></div>`; }); document.getElementById('listRiwayat').innerHTML=h; }
+    function logout() { if(gpsId) navigator.geolocation.clearWatch(gpsId); userGlobal={}; document.getElementById('formLogin').reset(); document.getElementById('dashboard').classList.add('hidden'); document.getElementById('loginPage').classList.remove('hidden'); }
   </script>
 </body>
 </html>
