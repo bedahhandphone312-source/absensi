@@ -332,29 +332,30 @@
     });
 
     function setupTombol(info) {
+      // Sembunyikan semua elemen dashboard dulu
       document.getElementById('btnMasuk').classList.add('hidden');
       document.getElementById('btnPulang').classList.add('hidden');
       document.getElementById('msgSelesai').classList.add('hidden');
+      
       var infoDiv = document.getElementById('infoStatus');
       var tgl = info.tanggal || "Hari Ini";
 
+      // LOGIKA BARU: Prioritaskan status data yang ada di database
       if (!info.adaData) {
-        infoDiv.innerHTML = `<div class="fw-bold text-primary">${tgl}</div><small>Belum Absen</small>`;
+        infoDiv.innerHTML = `<div class="fw-bold text-primary">${tgl}</div><small>Silakan Absen Masuk</small>`;
         document.getElementById('btnMasuk').classList.remove('hidden');
-      } else {
-          if (info.status === 'Hadir') {
-              if (!info.sudahPulang) {
-                  infoDiv.innerHTML = `<div class="fw-bold text-success">${tgl}</div><small>IN: <b>${info.jamMasuk}</b></small>`;
-                  document.getElementById('btnPulang').classList.remove('hidden');
-              } else {
-                  infoDiv.innerHTML = `<div class="fw-bold text-dark">${tgl}</div><small>IN: ${info.jamMasuk} | OUT: ${info.jamPulang}</small>`;
-                  document.getElementById('msgSelesai').classList.remove('hidden');
-              }
-          } else {
-              infoDiv.innerHTML = `<div class="fw-bold text-warning">${tgl}</div><small>Status: ${info.status} (${info.approval})</small>`;
-              document.getElementById('msgSelesai').innerHTML = "Pengajuan Terkirim";
-              document.getElementById('msgSelesai').classList.remove('hidden');
-          }
+      } 
+      else if (info.adaData && !info.sudahPulang) {
+        // Paksa tombol pulang muncul jika data masuk terdeteksi
+        infoDiv.innerHTML = `<div class="fw-bold text-success">${tgl}</div><small>Sudah Masuk: <b>${info.jamMasuk}</b></small>`;
+        document.getElementById('btnPulang').classList.remove('hidden');
+      } 
+      else if (info.adaData && info.sudahPulang) {
+        infoDiv.innerHTML = `<div class="fw-bold text-dark">${tgl}</div><small>IN: ${info.jamMasuk} | OUT: ${info.jamPulang}</small>`;
+        document.getElementById('msgSelesai').classList.remove('hidden');
+      }
+      else {
+        infoDiv.innerHTML = `<div class="fw-bold text-warning">${tgl}</div><small>Status: ${info.status}</small>`;
       }
     }
 
@@ -500,5 +501,6 @@
   </script>
 </body>
 </html>
+
 
 
