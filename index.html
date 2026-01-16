@@ -183,6 +183,19 @@
         </div>
         <div id="infoStatus" class="card-glass text-center"><div class="spinner-border spinner-border-sm text-secondary"></div></div>
 
+        <div class="card-glass p-3 mb-3" style="background: linear-gradient(135deg, #10b981, #059669); color: white; border:none;">
+           <div class="d-flex justify-content-between align-items-center">
+              <div>
+                 <small class="opacity-75">Estimasi Pendapatan</small>
+                 <h3 class="fw-bold m-0" id="dashTotalGaji">Rp 0</h3>
+              </div>
+              <div class="text-end">
+                 <small class="d-block"><i class="fas fa-calendar-check me-1"></i>Hadir: <span id="dashHadir">0</span> Hari</small>
+                 <small style="font-size:0.7rem" class="opacity-75">*Update Realtime</small>
+              </div>
+           </div>
+        </div>
+
         <div id="areaOwner" class="hidden mb-3">
             <button onclick="bukaOwnerPanel()" class="btn-main btn-gold shadow-sm"><i class="fas fa-user-shield me-2"></i> PANEL OWNER & USER</button>
         </div>
@@ -202,14 +215,18 @@
 
     <div id="modalOwner" class="modal-full hidden fade-in">
         <div class="modal-header"><h5 class="fw-bold m-0">Panel Owner</h5><button onclick="document.getElementById('modalOwner').classList.add('hidden')" class="btn-close"></button></div>
+        
         <ul class="nav nav-tabs justify-content-center bg-white" role="tablist">
           <li class="nav-item"><button class="nav-link active" data-bs-toggle="tab" data-bs-target="#tab-approval">Approval</button></li>
           <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-rekap">Laporan</button></li>
           <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-users" onclick="loadUsers()">Kelola User</button></li>
+          <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-keuangan">Keuangan</button></li>
         </ul>
+
         <div class="modal-content-scroll">
             <div class="tab-content">
                 <div class="tab-pane fade show active" id="tab-approval"><div id="listApproval">Loading...</div></div>
+                
                 <div class="tab-pane fade" id="tab-rekap">
                     <div class="card-glass p-3 mb-3">
                         <select id="filterCabang" class="form-select mb-2"><option value="All">Semua Cabang</option></select>
@@ -221,11 +238,41 @@
                     </div>
                     <div id="hasilRekap"></div>
                 </div>
+
                 <div class="tab-pane fade" id="tab-users">
                     <button onclick="formUser('add')" class="btn-main btn-primary mb-3"><i class="fas fa-plus me-2"></i> Tambah User Baru</button>
                     <div id="listUsers" class="card-glass p-0"></div>
                 </div>
-            </div>
+
+                <div class="tab-pane fade" id="tab-keuangan">
+                    <div class="card-glass p-3 mb-3">
+                        <h6 class="fw-bold mb-3"><i class="fas fa-money-bill-wave text-success me-2"></i>Setting Gaji User</h6>
+                        <label class="small">Pilih Karyawan</label>
+                        <select id="gajiUserList" class="form-select mb-2"></select>
+                        
+                        <div class="row g-2 mb-2">
+                          <div class="col-12">
+                            <label class="small fw-bold">Gaji Pokok (Bulanan)</label>
+                            <input type="number" id="inputGP" class="form-control" placeholder="Rp 0">
+                          </div>
+                          <div class="col-12">
+                            <label class="small fw-bold">Insentif Per Kehadiran</label>
+                            <input type="number" id="inputInsentif" class="form-control" placeholder="Rp 0">
+                          </div>
+                        </div>
+                        <button onclick="simpanGaji()" class="btn-main btn-success">Simpan Konfigurasi</button>
+                    </div>
+
+                    <div class="card-glass p-3">
+                        <h6 class="fw-bold mb-3"><i class="fas fa-calendar-times text-danger me-2"></i>Tambah Hari Libur</h6>
+                        <label class="small">Tanggal Merah</label>
+                        <input type="date" id="inputTglLibur" class="form-control mb-2">
+                        <label class="small">Keterangan</label>
+                        <input type="text" id="inputKetLibur" class="form-control mb-2" placeholder="Contoh: Idul Fitri">
+                        <button onclick="simpanLibur()" class="btn-main btn-danger">Simpan Libur</button>
+                    </div>
+                </div>
+                </div>
         </div>
     </div>
 
@@ -276,7 +323,7 @@
   <script>
     // ==========================================
     // PASTE URL DEPLOYMENT DISINI
-    const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbw-77D7BjT8VhJ0yWja5ijqNJPWiM0ETX6O92pDMw-mMgf1_Lz5DraIE4BtU8zZM-NS/exec"; 
+    const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzHJfJS-J1-a1_xtDw6SILMfvtWNhP7mz06UWKP8JzM7yT9oGATh4CiOtbaYHwOYAFe/exec"; 
     // ==========================================
     const DAFTAR_KANTOR = [
       { nama: "Cabang Aimas 1", lat: -0.9571588, lon: 131.3232882 },
@@ -310,6 +357,7 @@
     // LOGIN
     // UPDATE LOGIN (Dengan SweetAlert)
     // UPDATE LOGIN (Versi Alert Lebih Kecil & Elegan)
+    // UPDATE LOGIN (Dengan Fitur Gaji)
     document.getElementById('formLogin').addEventListener('submit', async function(e){
       e.preventDefault();
       var res = await kirimKeServer({ action: 'login', username: document.getElementById('username').value, password: document.getElementById('password').value });
@@ -325,33 +373,23 @@
         else document.getElementById('areaOwner').classList.add('hidden');
 
         setupTombol(res.absenInfo);
+
+        // --- TAMPILKAN INFO GAJI (BARU) ---
+        if(res.gajiInfo) {
+           document.getElementById('dashTotalGaji').innerText = res.gajiInfo.totalGaji;
+           document.getElementById('dashHadir').innerText = res.gajiInfo.totalHadir;
+        }
+        // ----------------------------------
+
         document.getElementById('loginPage').classList.add('hidden');
         document.getElementById('dashboard').classList.remove('hidden');
         startGPS();
         
-        // --- NOTIFIKASI KECIL (TOAST) ---
-        const Toast = Swal.mixin({
-          toast: true,
-          position: 'top-end',
-          showConfirmButton: false,
-          timer: 2000,
-          timerProgressBar: true
-        });
-
-        Toast.fire({
-          icon: 'success',
-          title: 'Halo ' + userGlobal.nama + ', Selamat Datang'
-        });
+        const Toast = Swal.mixin({ toast: true, position: 'top-end', showConfirmButton: false, timer: 2000, timerProgressBar: true });
+        Toast.fire({ icon: 'success', title: 'Halo ' + userGlobal.nama });
 
       } else { 
-        // Alert Gagal tetap muncul di tengah tapi kita perkecil ukurannya
-        Swal.fire({ 
-          icon: 'error', 
-          title: 'Login Gagal', 
-          text: 'Username/Password salah!',
-          confirmButtonColor: '#4361ee',
-          width: '300px' // Kita kunci lebarnya biar mungil
-        });
+        Swal.fire({ icon: 'error', title: 'Login Gagal', text: 'Username atau Password salah!', width: '300px' });
       }
     });
 
@@ -522,9 +560,52 @@
     function hitungJarak(lat1,lon1,lat2,lon2){ if(lat1==0)return 0; var R=6371e3, p=Math.PI/180; var a=0.5-Math.cos((lat2-lat1)*p)/2+Math.cos(lat1*p)*Math.cos(lat2*p)*(1-Math.cos((lon2-lon1)*p))/2; return R*2*Math.asin(Math.sqrt(a)); }
     async function bukaRiwayat() { document.getElementById('modalRiwayat').classList.remove('hidden'); var res=await kirimKeServer({action:'riwayat',nama:userGlobal.nama}); var h=""; res.data.forEach(r=>{ h+=`<div class="card-glass p-2 mb-2"><div class="d-flex justify-content-between"><span class="fw-bold small">${r.tanggal}</span><span class="badge bg-light text-dark border">${r.status}</span></div></div>`; }); document.getElementById('listRiwayat').innerHTML=h; }
     function logout() { if(gpsId) navigator.geolocation.clearWatch(gpsId); userGlobal={}; document.getElementById('formLogin').reset(); document.getElementById('dashboard').classList.add('hidden'); document.getElementById('loginPage').classList.remove('hidden'); }
+  // ==========================================
+    // LOGIKA KEUANGAN & LIBUR (BARU)
+    // ==========================================
+    
+    // Load User saat tab Keuangan diklik
+    document.querySelector('[data-bs-target="#tab-keuangan"]').addEventListener('click', async function(){
+       var res = await kirimKeServer({ action: 'get_users' });
+       if(res.status == 'sukses'){
+           let sel = document.getElementById('gajiUserList');
+           sel.innerHTML = '<option value="">-- Pilih Karyawan --</option>';
+           res.data.forEach(u => {
+               sel.innerHTML += `<option value="${u.nama}">${u.nama}</option>`;
+           });
+       }
+    });
+
+    async function simpanGaji(){
+       var u = document.getElementById('gajiUserList').value;
+       var gp = document.getElementById('inputGP').value;
+       var ins = document.getElementById('inputInsentif').value;
+       
+       if(!u) return Swal.fire({icon:'error', title:'Pilih user dulu', width:'300px'});
+       
+       Swal.fire({ title: 'Menyimpan...', didOpen: () => { Swal.showLoading() }, width:'250px' });
+       var res = await kirimKeServer({
+           action: 'save_gaji_config',
+           username: u,
+           gp: gp,
+           insentif: ins
+       });
+       if(res.status == 'sukses') Swal.fire({icon:'success', title:'Tersimpan', text: res.message, width:'300px'});
+    }
+
+    async function simpanLibur(){
+       var tgl = document.getElementById('inputTglLibur').value;
+       var ket = document.getElementById('inputKetLibur').value;
+       if(!tgl) return Swal.fire({icon:'warning', title:'Pilih Tanggal', width:'300px'});
+       
+       Swal.fire({ title: 'Menyimpan...', didOpen: () => { Swal.showLoading() }, width:'250px' });
+       var res = await kirimKeServer({
+           action: 'save_hari_libur',
+           tanggal: tgl,
+           ket: ket
+       });
+       if(res.status == 'sukses') Swal.fire({icon:'success', title:'Tersimpan', text: res.message, width:'300px'});
+    }
   </script>
 </body>
 </html>
-
-
-
