@@ -218,6 +218,11 @@
           <div class="menu-item" onclick="bukaRiwayat()"><i class="fas fa-history fa-lg text-primary mb-2"></i><div class="small">Riwayat</div></div>
           <div class="menu-item" onclick="tampilFormIzin()"><i class="fas fa-file-medical fa-lg text-warning mb-2"></i><div class="small">Izin / Sakit</div></div>
         </div>
+        <div class="card-glass mt-3 text-center py-2" style="border-left: 4px solid var(--primary);">
+           <div class="text-muted small fw-bold" style="font-size: 0.65rem; letter-spacing: 1px;">WAKTU SAAT INI</div>
+           <div id="liveClock" class="fw-bold my-1" style="font-size: 2.2rem; line-height: 1; color: var(--primary-dark); font-family: monospace;">--:--:--</div>
+           <div id="liveDate" class="text-secondary" style="font-size: 0.75rem;">-</div>
+      </div>
       </div>
     </div>
 
@@ -350,25 +355,41 @@
     </div>
   </div>
   <div id="modalSlip" class="modal-full hidden">
-      <div class="modal-header bg-dark text-white">
-          <h5 class="fw-bold m-0">Rincian Gaji Bulan Ini</h5>
-          <button onclick="document.getElementById('modalSlip').classList.add('hidden')" class="btn-close btn-close-white"></button>
-      </div>
-      <div class="modal-content-scroll p-3">
-          <div class="card-glass p-3 mb-3 bg-light">
-              <h6 class="fw-bold border-bottom pb-2">Ringkasan</h6>
-              <div class="d-flex justify-content-between mb-1"><span>Gaji Pokok</span><span class="fw-bold" id="slipGapok">-</span></div>
-              <div class="d-flex justify-content-between mb-1"><span>Insentif Hadir</span><span class="fw-bold text-success" id="slipInsentif">-</span></div>
-              <div class="d-flex justify-content-between mb-1"><span>Potongan Telat</span><span class="fw-bold text-danger" id="slipPotongan">-</span></div>
-              <hr>
-              <div class="d-flex justify-content-between h5 fw-bold"><span>Total Terima</span><span class="text-primary" id="slipTotal">-</span></div>
-          </div>
+   <div class="modal-header bg-dark text-white">
+       <h5 class="fw-bold m-0">Slip Gaji</h5>
+       <button onclick="document.getElementById('modalSlip').classList.add('hidden')" class="btn-close btn-close-white"></button>
+   </div>
+   <div class="modal-content-scroll p-3">
+       
+       <div class="d-flex gap-2 mb-3">
+          <select id="slipBulan" class="form-select form-select-sm" onchange="updateSlipGaji()">
+              <option value="1">Januari</option><option value="2">Februari</option><option value="3">Maret</option>
+              <option value="4">April</option><option value="5">Mei</option><option value="6">Juni</option>
+              <option value="7">Juli</option><option value="8">Agustus</option><option value="9">September</option>
+              <option value="10">Oktober</option><option value="11">November</option><option value="12">Desember</option>
+          </select>
+          <select id="slipTahun" class="form-select form-select-sm" onchange="updateSlipGaji()">
+              <option value="2025">2025</option><option value="2026">2026</option>
+          </select>
+       </div>
 
-          <h6 class="fw-bold mt-4 mb-2 text-danger"><i class="fas fa-exclamation-circle me-2"></i>Detail Keterlambatan</h6>
-          <div id="listTelat" class="small">
-              </div>
-      </div>
-    </div>
+       <div id="areaSlipLoading" class="hidden text-center py-5"><div class="spinner-border text-primary"></div></div>
+       
+       <div id="areaSlipData">
+           <div class="card-glass p-3 mb-3 bg-light">
+               <h6 class="fw-bold border-bottom pb-2">Ringkasan</h6>
+               <div class="d-flex justify-content-between mb-1"><span>Gaji Pokok</span><span class="fw-bold" id="slipGapok">-</span></div>
+               <div class="d-flex justify-content-between mb-1"><span>Insentif Hadir</span><span class="fw-bold text-success" id="slipInsentif">-</span></div>
+               <div class="d-flex justify-content-between mb-1"><span>Potongan Telat</span><span class="fw-bold text-danger" id="slipPotongan">-</span></div>
+               <hr>
+               <div class="d-flex justify-content-between h5 fw-bold"><span>Total Terima</span><span class="text-primary" id="slipTotal">-</span></div>
+           </div>
+
+           <h6 class="fw-bold mt-4 mb-2 text-danger"><i class="fas fa-exclamation-circle me-2"></i>Detail Keterlambatan</h6>
+           <div id="listTelat" class="small"></div>
+       </div>
+   </div>
+ </div>
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
   <script>
@@ -696,36 +717,89 @@
   // --- FITUR SLIP GAJI ---
     var cacheGaji = null; // Variabel penampung
 
-    function lihatSlipGaji() {
-        if(!cacheGaji) return Swal.fire('Info', 'Data gaji belum dimuat. Silakan login ulang.', 'info');
-        
-        document.getElementById('modalSlip').classList.remove('hidden');
-        
-        // Isi Data Ringkasan
-        document.getElementById('slipGapok').innerText = cacheGaji.gajiPokok;
-        document.getElementById('slipInsentif').innerText = cacheGaji.insentifTotal;
-        document.getElementById('slipPotongan').innerText = cacheGaji.totalTelat;
-        document.getElementById('slipTotal').innerText = cacheGaji.grandTotal;
+    // --- FITUR SLIP GAJI DINAMIS ---
+ 
+ function lihatSlipGaji() {
+     document.getElementById('modalSlip').classList.remove('hidden');
+     
+     // Set Default ke Bulan Ini
+     var now = new Date();
+     document.getElementById('slipBulan').value = now.getMonth() + 1; // Jan = 1
+     document.getElementById('slipTahun').value = now.getFullYear();
+     
+     // Load Data
+     updateSlipGaji(); 
+ }
 
-        // Isi List Detail Telat
-        var list = document.getElementById('listTelat');
-        list.innerHTML = "";
+ async function updateSlipGaji() {
+     var bln = document.getElementById('slipBulan').value;
+     var thn = document.getElementById('slipTahun').value;
+     
+     // Tampilan Loading
+     document.getElementById('areaSlipData').classList.add('hidden');
+     document.getElementById('areaSlipLoading').classList.remove('hidden');
+     
+     // Panggil Server (Ambil Gaji userGlobal, Bulan X, Tahun Y)
+     var res = await kirimKeServer({ 
+         action: 'get_slip_gaji', 
+         username: userGlobal.username, // Pastikan userGlobal tersimpan saat login
+         bulan: bln, 
+         tahun: thn 
+     });
+     
+     if(res.status == 'sukses') {
+         // Isi Data Ringkasan
+         document.getElementById('slipGapok').innerText = res.gajiPokok;
+         document.getElementById('slipInsentif').innerText = res.insentifTotal;
+         document.getElementById('slipPotongan').innerText = res.totalTelat;
+         document.getElementById('slipTotal').innerText = res.grandTotal;
+
+         // Isi List Detail Telat
+         var list = document.getElementById('listTelat');
+         list.innerHTML = "";
+         
+         if(res.rincian && res.rincian.length > 0){
+             res.rincian.forEach(r => {
+                 list.innerHTML += `
+                 <div class="d-flex justify-content-between border-bottom py-2">
+                     <div>
+                         <span class="fw-bold">${r.tanggal}</span>
+                         <div class="text-muted" style="font-size:0.75rem;">Telat ${r.menit} Menit</div>
+                     </div>
+                     <div class="text-danger fw-bold">- Rp ${Number(r.denda).toLocaleString("id-ID")}</div>
+                 </div>`;
+             });
+         } else {
+             list.innerHTML = "<div class='text-center text-muted p-3'>Tidak ada keterlambatan.</div>";
+         }
+     }
+     
+     // Tampilkan Data
+     document.getElementById('areaSlipLoading').classList.add('hidden');
+     document.getElementById('areaSlipData').classList.remove('hidden');
+ }
+  // --- SCRIPT JAM DIGITAL LIVE ---
+    function updateClock() {
+        var now = new Date();
+        // Format Jam (HH:mm:ss)
+        var jam = String(now.getHours()).padStart(2, '0') + ":" + 
+                  String(now.getMinutes()).padStart(2, '0') + ":" + 
+                  String(now.getSeconds()).padStart(2, '0');
+                  
+        // Format Tanggal (Hari, Tgl Bulan Tahun)
+        var options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+        var tgl = now.toLocaleDateString('id-ID', options);
         
-        if(cacheGaji.rincian && cacheGaji.rincian.length > 0){
-            cacheGaji.rincian.forEach(r => {
-                list.innerHTML += `
-                <div class="d-flex justify-content-between border-bottom py-2">
-                    <div>
-                        <span class="fw-bold">${r.tanggal}</span>
-                        <div class="text-muted" style="font-size:0.75rem;">Telat ${r.menit} Menit</div>
-                    </div>
-                    <div class="text-danger fw-bold">- Rp ${Number(r.denda).toLocaleString("id-ID")}</div>
-                </div>`;
-            });
-        } else {
-            list.innerHTML = "<div class='text-center text-muted p-3'>Hore! Kamu disiplin bulan ini.<br>Tidak ada potongan.</div>";
-        }
+        var elJam = document.getElementById('liveClock');
+        var elTgl = document.getElementById('liveDate');
+        
+        if(elJam) elJam.innerText = jam;
+        if(elTgl) elTgl.innerText = tgl;
     }
+    
+    // Jalankan setiap 1000ms (1 detik)
+    setInterval(updateClock, 1000);
+    updateClock(); // Jalankan langsung saat load
   </script>
 </body>
 </html>
