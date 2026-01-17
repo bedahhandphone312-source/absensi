@@ -428,8 +428,14 @@
                <div class="d-flex justify-content-between h5 fw-bold"><span>Total Terima</span><span class="text-primary" id="slipTotal">-</span></div>
            </div>
 
-           <h6 class="fw-bold mt-4 mb-2 text-danger"><i class="fas fa-exclamation-circle me-2"></i>Detail Keterlambatan</h6>
-           <div id="listTelat" class="small"></div>
+           <div class="card-glass border-0 mt-3 p-2 bg-white shadow-sm">
+    <h6 class="fw-bold small border-bottom pb-2 mb-2 text-dark">
+        <i class="fas fa-list-ul me-2 text-primary"></i> RINCIAN POTONGAN
+    </h6>
+    <div id="wadahRincianList" style="max-height: 250px; overflow-y: auto;">
+        <div class="text-center text-muted small py-2">Memuat data...</div>
+    </div>
+</div>
        </div>
    </div>
  </div>
@@ -480,8 +486,13 @@
       
       if(res && res.status == 'sukses'){
         userGlobal = res.data;
+        
+        // ✅ INI BARIS KUNCI PERBAIKANNYA
+        userGlobal.username = document.getElementById('username').value; 
+
         document.getElementById('userNama').innerText = userGlobal.nama;
         document.getElementById('userKantor').innerHTML = userGlobal.kantorTugas;
+        
         var kantor = DAFTAR_KANTOR.find(k => k.nama === userGlobal.kantorTugas);
         if(kantor) { targetLat = kantor.lat; targetLon = kantor.lon; } else { targetLat=0; targetLon=0; }
         
@@ -492,11 +503,12 @@
 
         // --- UPDATE PENTING: SIMPAN DATA GAJI ---
         if(res.gajiInfo) {
-           cacheGaji = res.gajiInfo; // Simpan ke variabel global
+           cacheGaji = res.gajiInfo; 
            document.getElementById('dashTotalGaji').innerText = res.gajiInfo.grandTotal;
            document.getElementById('dashGapok').innerText = res.gajiInfo.gajiPokok;
            document.getElementById('dashPotTelat').innerText = res.gajiInfo.totalTelat;
         }
+        // ... (kode selanjutnya: pindah halaman dashboard) ...
         // ----------------------------------------
 
         document.getElementById('loginPage').classList.add('hidden');
@@ -779,20 +791,22 @@
  }
 
  async function updateSlipGaji() {
-     var bln = document.getElementById('slipBulan').value;
-     var thn = document.getElementById('slipTahun').value;
-     
-     // Tampilan Loading
-     document.getElementById('areaSlipData').classList.add('hidden');
-     document.getElementById('areaSlipLoading').classList.remove('hidden');
-     
-     // Panggil Server (Ambil Gaji userGlobal, Bulan X, Tahun Y)
-     var res = await kirimKeServer({ 
-         action: 'get_slip_gaji', 
-         username: userGlobal.username, // Pastikan userGlobal tersimpan saat login
-         bulan: bln, 
-         tahun: thn 
-     });
+      var bln = document.getElementById('slipBulan').value;
+      var thn = document.getElementById('slipTahun').value;
+      
+      document.getElementById('areaSlipData').classList.add('hidden');
+      document.getElementById('areaSlipLoading').classList.remove('hidden');
+      
+      // PERBAIKAN DISINI: KIRIM NAMA JUGA
+      var res = await kirimKeServer({ 
+          action: 'get_slip_gaji', 
+          username: userGlobal.username,  // Untuk cari config gaji
+          nama: userGlobal.nama,          // Untuk hitung absen
+          bulan: bln, 
+          tahun: thn 
+      });
+      
+      // ... (kode bawahnya biarkan saja)
      
      if(res.status == 'sukses') {
          // Isi Data Ringkasan
@@ -802,23 +816,39 @@
          document.getElementById('slipTotal').innerText = res.grandTotal;
 
          // Isi List Detail Telat
-         var list = document.getElementById('listTelat');
-         list.innerHTML = "";
-         
-         if(res.rincian && res.rincian.length > 0){
-             res.rincian.forEach(r => {
-                 list.innerHTML += `
-                 <div class="d-flex justify-content-between border-bottom py-2">
-                     <div>
-                         <span class="fw-bold">${r.tanggal}</span>
-                         <div class="text-muted" style="font-size:0.75rem;">Telat ${r.menit} Menit</div>
-                     </div>
-                     <div class="text-danger fw-bold">- Rp ${Number(r.denda).toLocaleString("id-ID")}</div>
-                 </div>`;
-             });
-         } else {
-             list.innerHTML = "<div class='text-center text-muted p-3'>Tidak ada keterlambatan.</div>";
-         }
+         // --- LOGIKA BARU: SUPPORT ALPHA & TELAT ---
+          var wadah = document.getElementById('wadahRincianList');
+          wadah.innerHTML = ""; 
+
+          if(res.rincian && res.rincian.length > 0){
+              res.rincian.forEach(function(item) {
+                  // Cek apakah ini Alpha atau Telat
+                  var isAlpha = item.ket.includes("Alpha") || item.ket.includes("Bolos");
+                  
+                  // Warna: Merah Gelap (Alpha) vs Merah Biasa (Telat)
+                  var styleWarna = isAlpha ? "color:#b91c1c; font-weight:bold;" : "color:#ef4444;";
+                  var icon = isAlpha ? '<i class="fas fa-times-circle text-danger me-1"></i>' : '<i class="far fa-clock me-1"></i>';
+
+                  var barisHTML = `
+                  <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid #f1f5f9; padding:8px 0; font-size:0.85rem;">
+                      <div>
+                          <span style="font-weight:bold; color:#334155;">${item.tanggal}</span><br>
+                          <span style="${styleWarna} font-size:0.75rem;">${icon} ${item.ket}</span>
+                      </div>
+                      <div style="font-weight:bold; ${styleWarna}">
+                          - Rp ${Number(item.denda).toLocaleString('id-ID')}
+                      </div>
+                  </div>`;
+                  
+                  wadah.innerHTML += barisHTML;
+              });
+          } else {
+              wadah.innerHTML = `
+              <div class="alert alert-success py-3 mt-2 small text-center border-0 bg-success bg-opacity-10 text-success">
+                  <i class="fas fa-check-circle fa-2x mb-2"></i><br>
+                  <b>Disiplin Mantap!</b><br>Tidak ada potongan bulan ini.
+              </div>`;
+          }
      }
      
      // Tampilkan Data
