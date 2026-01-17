@@ -183,16 +183,24 @@
         </div>
         <div id="infoStatus" class="card-glass text-center"><div class="spinner-border spinner-border-sm text-secondary"></div></div>
 
-        <div class="card-glass p-3 mb-3" style="background: linear-gradient(135deg, #10b981, #059669); color: white; border:none;">
-           <div class="d-flex justify-content-between align-items-center">
+        <div class="card-glass p-3 mb-3" style="background: linear-gradient(135deg, #1e293b, #0f172a); color: white; border:none;">
+           <div class="d-flex justify-content-between align-items-start">
               <div>
-                 <small class="opacity-75">Estimasi Pendapatan</small>
-                 <h3 class="fw-bold m-0" id="dashTotalGaji">Rp 0</h3>
+                 <small class="opacity-75">Estimasi Bersih</small>
+                 <h2 class="fw-bold m-0 text-warning" id="dashTotalGaji">Rp 0</h2>
               </div>
-              <div class="text-end">
-                 <small class="d-block"><i class="fas fa-calendar-check me-1"></i>Hadir: <span id="dashHadir">0</span> Hari</small>
-                 <small style="font-size:0.7rem" class="opacity-75">*Update Realtime</small>
-              </div>
+              <button onclick="lihatSlipGaji()" class="btn btn-sm btn-outline-light rounded-pill px-3" style="font-size:0.7rem;">
+                 <i class="fas fa-file-invoice-dollar me-1"></i> Rincian
+              </button>
+           </div>
+           <hr class="my-2 opacity-25">
+           <div class="d-flex justify-content-between small opacity-75">
+              <span><i class="fas fa-check-circle me-1"></i>Gaji Pokok</span>
+              <span id="dashGapok">-</span>
+           </div>
+           <div class="d-flex justify-content-between small opacity-75">
+              <span><i class="fas fa-clock me-1"></i>Pot. Telat</span>
+              <span id="dashPotTelat" class="text-danger fw-bold">-</span>
            </div>
         </div>
 
@@ -246,25 +254,48 @@
 
                 <div class="tab-pane fade" id="tab-keuangan">
                     <div class="card-glass p-3 mb-3">
-                        <h6 class="fw-bold mb-3"><i class="fas fa-money-bill-wave text-success me-2"></i>Setting Gaji User</h6>
-                        <label class="small">Pilih Karyawan</label>
-                        <select id="gajiUserList" class="form-select mb-2"></select>
+                        <h6 class="fw-bold mb-3 border-bottom pb-2"><i class="fas fa-money-check-alt text-success me-2"></i>Atur Gaji & Disiplin</h6>
                         
-                        <div class="row g-2 mb-2">
-                          <div class="col-12">
-                            <label class="small fw-bold">Gaji Pokok (Bulanan)</label>
-                            <input type="number" id="inputGP" class="form-control" placeholder="Rp 0">
-                          </div>
-                          <div class="col-12">
-                            <label class="small fw-bold">Insentif Per Kehadiran</label>
-                            <input type="number" id="inputInsentif" class="form-control" placeholder="Rp 0">
-                          </div>
+                        <label class="small fw-bold text-muted">Pilih Karyawan</label>
+                        <select id="gajiUserList" class="form-select mb-3" onchange="loadDetailGajiUser()"></select>
+                        
+                        <div class="bg-light p-2 rounded mb-3 border">
+                            <label class="small fw-bold text-primary mb-2">1. Komponen Pendapatan</label>
+                            <div class="row g-2">
+                              <div class="col-6">
+                                <label class="small" style="font-size:0.7rem">Gaji Pokok (Bulanan)</label>
+                                <input type="number" id="inputGP" class="form-control" placeholder="0">
+                              </div>
+                              <div class="col-6">
+                                <label class="small" style="font-size:0.7rem">Insentif (Harian)</label>
+                                <input type="number" id="inputInsentif" class="form-control" placeholder="0">
+                              </div>
+                            </div>
                         </div>
-                        <button onclick="simpanGaji()" class="btn-main btn-success">Simpan Konfigurasi</button>
+
+                        <div class="bg-light p-2 rounded mb-3 border">
+                            <label class="small fw-bold text-danger mb-2">2. Aturan Disiplin</label>
+                            <div class="row g-2 mb-2">
+                                <div class="col-6">
+                                    <label class="small" style="font-size:0.7rem">Jam Masuk</label>
+                                    <input type="time" id="inputJamMasuk" class="form-control">
+                                </div>
+                                <div class="col-6">
+                                    <label class="small" style="font-size:0.7rem">Denda Alpha/Hari</label>
+                                    <input type="number" id="inputDendaAlpha" class="form-control" placeholder="0">
+                                </div>
+                            </div>
+                            <div class="mb-1">
+                                <label class="small" style="font-size:0.7rem">Denda Telat (Per Menit)</label>
+                                <input type="number" id="inputDendaTelat" class="form-control" placeholder="Contoh: 1000">
+                            </div>
+                        </div>
+
+                        <button onclick="simpanGaji()" class="btn-main btn-success shadow-sm">Simpan Pengaturan</button>
                     </div>
 
                     <div class="card-glass p-3">
-                        <h6 class="fw-bold mb-3"><i class="fas fa-calendar-times text-danger me-2"></i>Tambah Hari Libur</h6>
+                        <h6 class="fw-bold mb-3"><i class="fas fa-calendar-times text-danger me-2"></i>Kalender Libur</h6>
                         <label class="small">Tanggal Merah</label>
                         <input type="date" id="inputTglLibur" class="form-control mb-2">
                         <label class="small">Keterangan</label>
@@ -318,12 +349,32 @@
       <div id="listRiwayat" class="modal-content-scroll">Loading...</div>
     </div>
   </div>
+  <div id="modalSlip" class="modal-full hidden">
+      <div class="modal-header bg-dark text-white">
+          <h5 class="fw-bold m-0">Rincian Gaji Bulan Ini</h5>
+          <button onclick="document.getElementById('modalSlip').classList.add('hidden')" class="btn-close btn-close-white"></button>
+      </div>
+      <div class="modal-content-scroll p-3">
+          <div class="card-glass p-3 mb-3 bg-light">
+              <h6 class="fw-bold border-bottom pb-2">Ringkasan</h6>
+              <div class="d-flex justify-content-between mb-1"><span>Gaji Pokok</span><span class="fw-bold" id="slipGapok">-</span></div>
+              <div class="d-flex justify-content-between mb-1"><span>Insentif Hadir</span><span class="fw-bold text-success" id="slipInsentif">-</span></div>
+              <div class="d-flex justify-content-between mb-1"><span>Potongan Telat</span><span class="fw-bold text-danger" id="slipPotongan">-</span></div>
+              <hr>
+              <div class="d-flex justify-content-between h5 fw-bold"><span>Total Terima</span><span class="text-primary" id="slipTotal">-</span></div>
+          </div>
+
+          <h6 class="fw-bold mt-4 mb-2 text-danger"><i class="fas fa-exclamation-circle me-2"></i>Detail Keterlambatan</h6>
+          <div id="listTelat" class="small">
+              </div>
+      </div>
+    </div>
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
   <script>
     // ==========================================
     // PASTE URL DEPLOYMENT DISINI
-    const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzHJfJS-J1-a1_xtDw6SILMfvtWNhP7mz06UWKP8JzM7yT9oGATh4CiOtbaYHwOYAFe/exec"; 
+    const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxAwyUlAtyYUXgfr8-Kq7IDKX9O4OwpV592t4A0UwyYOfdnveSWDPjywCsV8zYEy8Da/exec"; 
     // ==========================================
     const DAFTAR_KANTOR = [
       { nama: "Cabang Aimas 1", lat: -0.9571588, lon: 131.3232882 },
@@ -358,6 +409,7 @@
     // UPDATE LOGIN (Dengan SweetAlert)
     // UPDATE LOGIN (Versi Alert Lebih Kecil & Elegan)
     // UPDATE LOGIN (Dengan Fitur Gaji)
+    // UPDATE LOGIN (SUPPORT SLIP GAJI)
     document.getElementById('formLogin').addEventListener('submit', async function(e){
       e.preventDefault();
       var res = await kirimKeServer({ action: 'login', username: document.getElementById('username').value, password: document.getElementById('password').value });
@@ -374,12 +426,14 @@
 
         setupTombol(res.absenInfo);
 
-        // --- TAMPILKAN INFO GAJI (BARU) ---
+        // --- UPDATE PENTING: SIMPAN DATA GAJI ---
         if(res.gajiInfo) {
-           document.getElementById('dashTotalGaji').innerText = res.gajiInfo.totalGaji;
-           document.getElementById('dashHadir').innerText = res.gajiInfo.totalHadir;
+           cacheGaji = res.gajiInfo; // Simpan ke variabel global
+           document.getElementById('dashTotalGaji').innerText = res.gajiInfo.grandTotal;
+           document.getElementById('dashGapok').innerText = res.gajiInfo.gajiPokok;
+           document.getElementById('dashPotTelat').innerText = res.gajiInfo.totalTelat;
         }
-        // ----------------------------------
+        // ----------------------------------------
 
         document.getElementById('loginPage').classList.add('hidden');
         document.getElementById('dashboard').classList.remove('hidden');
@@ -576,20 +630,53 @@
        }
     });
 
+    // --- UPDATE SCRIPT KEUANGAN OTOMATIS ---
+
+    // 1. Load Data User saat dipilih
+    async function loadDetailGajiUser() {
+        var u = document.getElementById('gajiUserList').value;
+        if(!u) return;
+        
+        // Tanda loading
+        document.getElementById('inputGP').placeholder = "Loading...";
+        
+        var res = await kirimKeServer({ action: 'get_gaji_detail', username: u });
+        if(res.status == 'sukses') {
+            var d = res.data;
+            document.getElementById('inputGP').value = d.gp;
+            document.getElementById('inputInsentif').value = d.insentif;
+            document.getElementById('inputJamMasuk').value = d.jam;
+            document.getElementById('inputDendaAlpha').value = d.dendaAlpha;
+            document.getElementById('inputDendaTelat').value = d.dendaTelat;
+        }
+    }
+
+    // 2. Simpan Data Lengkap
     async function simpanGaji(){
        var u = document.getElementById('gajiUserList').value;
+       
+       // Ambil semua value
        var gp = document.getElementById('inputGP').value;
        var ins = document.getElementById('inputInsentif').value;
+       var jam = document.getElementById('inputJamMasuk').value;
+       var da = document.getElementById('inputDendaAlpha').value;
+       var dt = document.getElementById('inputDendaTelat').value;
        
-       if(!u) return Swal.fire({icon:'error', title:'Pilih user dulu', width:'300px'});
+       if(!u) return Swal.fire({icon:'error', title:'Pilih karyawan dulu!', width:'300px'});
+       if(!jam) return Swal.fire({icon:'warning', title:'Jam Masuk wajib diisi', width:'300px'});
        
        Swal.fire({ title: 'Menyimpan...', didOpen: () => { Swal.showLoading() }, width:'250px' });
+       
        var res = await kirimKeServer({
            action: 'save_gaji_config',
            username: u,
            gp: gp,
-           insentif: ins
+           insentif: ins,
+           jam: jam,         
+           dendaAlpha: da,   
+           dendaTelat: dt    
        });
+       
        if(res.status == 'sukses') Swal.fire({icon:'success', title:'Tersimpan', text: res.message, width:'300px'});
     }
 
@@ -605,6 +692,39 @@
            ket: ket
        });
        if(res.status == 'sukses') Swal.fire({icon:'success', title:'Tersimpan', text: res.message, width:'300px'});
+    }
+  // --- FITUR SLIP GAJI ---
+    var cacheGaji = null; // Variabel penampung
+
+    function lihatSlipGaji() {
+        if(!cacheGaji) return Swal.fire('Info', 'Data gaji belum dimuat. Silakan login ulang.', 'info');
+        
+        document.getElementById('modalSlip').classList.remove('hidden');
+        
+        // Isi Data Ringkasan
+        document.getElementById('slipGapok').innerText = cacheGaji.gajiPokok;
+        document.getElementById('slipInsentif').innerText = cacheGaji.insentifTotal;
+        document.getElementById('slipPotongan').innerText = cacheGaji.totalTelat;
+        document.getElementById('slipTotal').innerText = cacheGaji.grandTotal;
+
+        // Isi List Detail Telat
+        var list = document.getElementById('listTelat');
+        list.innerHTML = "";
+        
+        if(cacheGaji.rincian && cacheGaji.rincian.length > 0){
+            cacheGaji.rincian.forEach(r => {
+                list.innerHTML += `
+                <div class="d-flex justify-content-between border-bottom py-2">
+                    <div>
+                        <span class="fw-bold">${r.tanggal}</span>
+                        <div class="text-muted" style="font-size:0.75rem;">Telat ${r.menit} Menit</div>
+                    </div>
+                    <div class="text-danger fw-bold">- Rp ${Number(r.denda).toLocaleString("id-ID")}</div>
+                </div>`;
+            });
+        } else {
+            list.innerHTML = "<div class='text-center text-muted p-3'>Hore! Kamu disiplin bulan ini.<br>Tidak ada potongan.</div>";
+        }
     }
   </script>
 </body>
