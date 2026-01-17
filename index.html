@@ -363,6 +363,12 @@
                     <span>Potongan Telat</span><span id="detPotongan" class="text-danger fw-bold">-</span>
                 </div>
             </div>
+          <h6 class="fw-bold small text-secondary mt-3 mb-2">
+    <i class="fas fa-history me-1"></i> LOG KEDISIPLINAN
+</h6>
+<div id="detLogTelat" class="bg-white rounded border p-0 overflow-hidden shadow-sm" style="max-height: 200px; overflow-y: auto;">
+    <div class="text-center p-3 text-muted small">Tidak ada data.</div>
+</div>
 
             <div class="alert alert-info small"><i class="fas fa-info-circle me-1"></i> Data di atas adalah data <b>Bulan Berjalan</b>. Untuk melihat bulan lalu, gunakan fitur Laporan.</div>
         </div>
@@ -882,25 +888,69 @@
         document.getElementById('modalDetailUser').classList.remove('hidden');
         document.getElementById('detailNamaUser').innerText = nama;
         
-        // Reset dulu biar gak nampilin data lama
+        // Reset tampilan loading
         document.getElementById('detHadir').innerText = "...";
         document.getElementById('detGajiTotal').innerText = "...";
+        document.getElementById('detLogTelat').innerHTML = '<div class="text-center p-3 text-muted small">Memuat data...</div>';
         
-        var res = await kirimKeServer({ action: 'get_user_stats', username: username }); // Request username buat cari data
+        // Request ke Server
+        var res = await kirimKeServer({ action: 'get_user_stats', username: username });
         
         if(res.status == 'sukses') {
-            // Isi Stats Absen
+            // 1. Isi Statistik Atas
             document.getElementById('detHadir').innerText = res.stats.hadir;
             document.getElementById('detIzin').innerText = res.stats.sakit + res.stats.izin;
             
-            // Hitung frekuensi telat dari array rincian gaji
             var jmlTelat = res.gaji.rincian ? res.gaji.rincian.length : 0;
             document.getElementById('detTelatFreq').innerText = jmlTelat;
             
-            // Isi Gaji
+            // 2. Isi Kartu Gaji
             document.getElementById('detGajiTotal').innerText = res.gaji.grandTotal;
             document.getElementById('detGajiPokok').innerText = res.gaji.gajiPokok;
             document.getElementById('detPotongan').innerText = res.gaji.totalTelat;
+
+            // 3. (BARU) ISI LOG KEDISIPLINAN DI BAWAH
+            // 3. ISI LOG KEDISIPLINAN (DENGAN DETAIL MENIT)
+            var wadahLog = document.getElementById('detLogTelat');
+            wadahLog.innerHTML = ""; 
+
+            if (res.gaji.rincian && res.gaji.rincian.length > 0) {
+                res.gaji.rincian.forEach(function(item) {
+                    
+                    var isAlpha = item.ket.includes("Alpha") || item.ket.includes("Bolos");
+                    var warna = isAlpha ? "text-danger fw-bold" : "text-danger";
+                    var icon = isAlpha ? "fa-times-circle" : "fa-clock";
+                    
+                    // --- BAGIAN BARU: LOGIKA MENIT ---
+                    var teksDetail = item.ket;
+                    if(item.menit > 0) {
+                        // Menambahkan info menit di sebelah kata "Telat"
+                        teksDetail += ` <b>(${item.menit} Menit)</b>`;
+                    }
+                    // ---------------------------------
+
+                    var htmlItem = `
+                    <div class="d-flex justify-content-between align-items-center border-bottom p-2 bg-white">
+                        <div style="line-height:1.2;">
+                            <span class="fw-bold text-dark small">${item.tanggal}</span><br>
+                            <small class="${warna}" style="font-size:0.7rem">
+                                <i class="fas ${icon} me-1"></i> ${teksDetail} 
+                            </small>
+                        </div>
+                        <div class="fw-bold ${warna} small">
+                            - Rp ${Number(item.denda).toLocaleString('id-ID')}
+                        </div>
+                    </div>`;
+                    
+                    wadahLog.innerHTML += htmlItem;
+                });
+            } else {
+                wadahLog.innerHTML = `
+                <div class="text-center p-4 text-success small">
+                    <i class="fas fa-check-circle fa-2x mb-2"></i><br>
+                    Karyawan Disiplin (Nihil)
+                </div>`;
+            }
         }
     }
   </script>
