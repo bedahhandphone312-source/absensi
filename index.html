@@ -953,6 +953,66 @@
             }
         }
     }
+  // ==========================================
+    // SISTEM PENAGIHAN OTOMATIS
+    // ==========================================
+    async function cekLicensi() {
+        try {
+            // Minta status ke server
+            var res = await kirimKeServer({ action: 'cek_status_app' });
+            
+            // SKENARIO 1: PERINGATAN (WARNING)
+            if (res.status === 'WARNING') {
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Peringatan Sistem',
+                    text: res.pesan || 'Harap hubungi Developer untuk administrasi.',
+                    confirmButtonText: 'Saya Mengerti',
+                    confirmButtonColor: '#f59e0b',
+                    allowOutsideClick: false
+                });
+            } 
+            // SKENARIO 2: KUNCI TOTAL (LOCKED)
+            else if (res.status === 'LOCKED') {
+                // Hapus seluruh tampilan aplikasi (Layar jadi putih)
+                document.body.innerHTML = ''; 
+                document.body.style.backgroundColor = '#000'; // Layar hitam biar dramatis
+                
+                // Munculkan Pesan Kematian
+                Swal.fire({
+                    icon: 'error',
+                    title: 'AKSES DITUTUP',
+                    html: `<h3 style="color:red; font-weight:bold;">SISTEM DINONAKTIFKAN</h3>
+                           <p style="color:#333">${res.pesan}</p>
+                           <br><small>Hubungi Developer untuk mengaktifkan kembali.</small>`,
+                    allowOutsideClick: false,
+                    allowEscapeKey: false,
+                    showConfirmButton: false // Hilangkan tombol OK, dia stuck disini
+                });
+            }
+        } catch (e) {
+            console.log("Cek lisensi skip...");
+        }
+    }
+
+    // PASANG PENGECEKAN SAAT APLIKASI DIBUKA (WINDOW LOAD)
+    // Cari baris: window.onload = async () => { ... }
+    // Tambahkan cekLicensi() di dalamnya.
+    
+    // Kalau bingung, TIMPA saja window.onload yang lama dengan ini:
+    window.onload = async () => {
+        // updateCartUI(); <--- Baris ini SUDAH DIHAPUS
+        
+        // Load Icon & Jam
+        if (typeof updateClock === 'function') updateClock();
+        
+        // 🔥 JEBAKAN DIAKTIFKAN 🔥
+        cekLicensi();
+        
+        // Fokus ke login
+        const loginInput = document.getElementById('username');
+        if (loginInput) loginInput.focus();
+    };
   </script>
 </body>
 </html>
