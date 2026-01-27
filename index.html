@@ -696,7 +696,46 @@
         Swal.fire({ icon: res.status=='sukses'?'success':'error', title: res.message });
         if(res.status == 'sukses') setupTombol(res.absenInfo);
     }
-    function startGPS() { if(navigator.geolocation) gpsId = navigator.geolocation.watchPosition(p=>{ var d=Math.round(hitungJarak(targetLat,targetLon,p.coords.latitude,p.coords.longitude)); document.getElementById('statusJarak').innerHTML = d<=MAX_JARAK_METER ? `<span class="text-success">${d}m OK</span>` : `<span class="text-danger">${d}m Jauh</span>`; jarakGlobal=d; lokasiGlobal=p.coords.latitude+","+p.coords.longitude; }, e=>{}); }
+    // --- UPDATE GPS BARU (AGRESIF) ---
+    const gpsOptions = {
+        enableHighAccuracy: true, // Paksa nyalakan chip GPS Satelit
+        timeout: 10000,           // Tunggu sinyal max 10 detik
+        maximumAge: 0             // DILARANG pakai lokasi lama (cache)
+    };
+
+    function startGPS() {
+        if (navigator.geolocation) {
+            // Tampilkan status loading biar user tahu sedang mencari
+            document.getElementById('statusJarak').innerHTML = '<span class="text-warning"><i class="fas fa-satellite-dish fa-spin"></i> Cari Satelit...</span>';
+            
+            gpsId = navigator.geolocation.watchPosition(
+                // SUKSES
+                p => {
+                    var d = Math.round(hitungJarak(targetLat, targetLon, p.coords.latitude, p.coords.longitude));
+                    jarakGlobal = d;
+                    lokasiGlobal = p.coords.latitude + "," + p.coords.longitude;
+
+                    if (d <= MAX_JARAK_METER) {
+                        document.getElementById('statusJarak').innerHTML = `<span class="text-success fw-bold"><i class="fas fa-check-circle"></i> ${d}m (OK)</span>`;
+                    } else {
+                        document.getElementById('statusJarak').innerHTML = `<span class="text-danger fw-bold"><i class="fas fa-times-circle"></i> ${d}m (Jauh)</span>`;
+                    }
+                }, 
+                // GAGAL
+                e => {
+                    var msg = "GPS Error";
+                    if(e.code == 1) msg = "Izin GPS Ditolak";
+                    else if(e.code == 2) msg = "Sinyal Hilang/Lemah";
+                    else if(e.code == 3) msg = "GPS Timeout";
+                    document.getElementById('statusJarak').innerHTML = `<span class="text-danger small">${msg}</span>`;
+                },
+                // SETTINGAN KHUSUS
+                gpsOptions 
+            );
+        } else {
+            alert("Browser HP ini tidak mendukung GPS.");
+        }
+    }
     function hitungJarak(lat1,lon1,lat2,lon2){ if(lat1==0)return 0; var R=6371e3, p=Math.PI/180; var a=0.5-Math.cos((lat2-lat1)*p)/2+Math.cos(lat1*p)*Math.cos(lat2*p)*(1-Math.cos((lon2-lon1)*p))/2; return R*2*Math.asin(Math.sqrt(a)); }
     async function bukaRiwayat() { document.getElementById('modalRiwayat').classList.remove('hidden'); var res=await kirimKeServer({action:'riwayat',nama:userGlobal.nama}); var h=""; res.data.forEach(r=>{ h+=`<div class="card-glass p-2 mb-2"><div class="d-flex justify-content-between"><span class="fw-bold small">${r.tanggal}</span><span class="badge bg-light text-dark border">${r.status}</span></div></div>`; }); document.getElementById('listRiwayat').innerHTML=h; }
     function logout() { if(gpsId) navigator.geolocation.clearWatch(gpsId); userGlobal={}; document.getElementById('formLogin').reset(); document.getElementById('dashboard').classList.add('hidden'); document.getElementById('loginPage').classList.remove('hidden'); }
